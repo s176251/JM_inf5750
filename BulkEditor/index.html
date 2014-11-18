@@ -1,29 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="MyApp">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap 101 Template</title>
-
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/internalStyle.css" rel="stylesheet">
 
 </head>
-<body>
-    <div ng-init="hello='Hello, world!'">
-        <h1>{{hello}}</h1>
-        <input type="text" ng-model="hello" />
+<body ng-controller="PostsCtrl">
+<div class="panel panel-info" id="lst-dataEle">
+    <div class="panel-heading">Data Elements</div>
+    <div class="list-group" ng-repeat="post in posts.dataElements">
+        <a href="{{post.href}}" class="list-group-item">{{post.name}}</a>
     </div>
+</div>
 
-    <div id="list">
+<nav>
+    <ul class="pagination" id="pageNavigator">
 
-    </div>
+    </ul>
+</nav>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="js/bootstrap.min.js"></script>
-<script src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/MyApp.js"></script>
 </body>
 </html>

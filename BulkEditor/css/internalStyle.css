@@ -1,0 +1,9 @@
+.list-group-item:last-child
+{
+    margin-bottom: 0px;
+}
+
+body
+{
+    margin: 50px;
+}
