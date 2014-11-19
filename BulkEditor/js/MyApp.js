@@ -145,7 +145,6 @@ function sortResults(array)
  * Creates a paginator-navigation-bar at the bottom, and highlights the currently selected page.
  * Renders a maximum of 5 page-links at a time (TODO: condsider changing???).
  * TODO: consider implementing input field for "direct"-jump to a page.
- * TODO: The links dont actually work at this time.
  * @param pageInfo
  */
 function makePageNav(pageInfo)
