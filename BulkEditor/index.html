@@ -10,17 +10,26 @@
     <link href="css/internalStyle.css" rel="stylesheet">
 
 </head>
-<body ng-controller="PostsCtrl">
-<div class="panel panel-info" id="lst-dataEle">
-    <div class="panel-heading">Data Elements</div>
-    <div class="list-group" ng-repeat="post in posts.dataElements">
-        <a href="{{post.href}}" class="list-group-item">{{post.name}}</a>
+<body id="hereBeDragons" ng-controller="PostsCtrl">
+
+<div class="input-group">
+    <input type="text" class="form-control" id="searchBar" autocomplete="on">
+    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+    </span>
+</div>
+
+<div>
+    <div class="panel panel-info" id="lst-dataEle">
+        <div class="panel-heading" ng-init="totalNrOfElements='()'">Data Elements {{totalNrOfElements}}</div>
+        <div class="list-group" ng-repeat="post in posts.dataElements">
+            <a href="{{post.href}}" class="list-group-item">{{post.name}}</a>
+        </div>
     </div>
 </div>
 
 <nav>
     <ul class="pagination" id="pageNavigator">
-
     </ul>
 </nav>
 
