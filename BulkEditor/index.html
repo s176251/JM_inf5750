@@ -19,11 +19,106 @@
     </span>
 </div>
 
-<div>
+<div class="listContainer">
     <div class="panel panel-info" id="lst-dataEle">
         <div class="panel-heading" ng-init="totalNrOfElements='()'">Data Elements {{totalNrOfElements}}</div>
-        <div class="list-group" ng-repeat="post in posts.dataElements">
-            <a href="{{post.href}}" class="list-group-item">{{post.name}}</a>
+    </div>
+    <div class="list-group" ng-repeat="post in posts.dataElements">
+       <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
+        <div class="panel panel-default">
+            <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}</div>
+            <div class="panel-body">
+                <div class="input-group">
+                    <span class="input-group-addon">Name</span>
+                    <input type="text" class="form-control" value="{{post.name}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Short name:</span>
+                    <input type="text" class="form-control" value="{{post.shortName}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Code:</span>
+                    <input type="text" class="form-control" value="{{post.code}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Description:</span>
+                    <input type="text" class="form-control" value="{{post.description}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Form name:</span>
+                    <input type="text" class="form-control" value="{{post.formName}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Domain type:</span>
+                    <input type="text" class="form-control" value="{{post.domainType}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Value type</span>
+                    <input type="text" class="form-control" value="{{post.type}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Number type:</span>
+                    <input type="text" class="form-control" value="{{post.numberType}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Aggregation Operator:</span>
+                    <input type="text" class="form-control" value="{{post.aggregationOperator}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Store zero values:</span>
+                    <input type="text" class="form-control" value="{{post.zeroIsSignificant}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">URL</span>
+                    <input type="text" class="form-control" value="{{post.url}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Category combination:</span>
+                    <input type="text" class="form-control" value="{{post.categoryCombo.name}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Option set for data values:</span>
+                    <input type="text" class="form-control" value="{{post.optionSet.name}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Option set for comments:</span>
+                    <input type="text" class="form-control" value="{{post.commentOptionSet.name}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Legend set</span>
+                    <input type="text" class="form-control" value="{{post.legendSet.name}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Aggregation Levels</span>
+                    <input type="text" class="form-control" value="{{post.aggregationLevels}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Rationale</span>
+                    <input type="text" class="form-control" value="{{post.attributeValues[1].value}}">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon">Unit of measure</span>
+                    <input type="text" class="form-control" value="{{post.attributeValues[0].value}}">
+                </div>
+
+            </div>
         </div>
     </div>
 </div>

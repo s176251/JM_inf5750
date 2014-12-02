@@ -7,3 +7,12 @@ body
 {
     margin: 50px;
 }
+
+.listContainer .panel-body {
+    display: none;
+
+}
+
+.input-group {
+    margin:2px;
+}

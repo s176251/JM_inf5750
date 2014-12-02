@@ -1,15 +1,16 @@
 var app = angular.module("MyApp", []);
-var url = 'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements.json';
+var url = 'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements.json?fields=*';
 var elementsPerPage = "20";
 var currentParam = "";
 var searchString = "";
 var ENTER_KEY = 13;
+var animationSpeed = 250;
 
 app.controller("PostsCtrl", function($scope, $http)
 {
     $http.defaults.headers.common.Authorization = 'Basic YWRtaW46ZGlzdHJpY3Q=';
 
-    $http.get(url + '?pageSize=' + elementsPerPage). //'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements?pageSize=10'
+    $http.get(url + '&pageSize=' + elementsPerPage). //'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements?pageSize=10'
         success(function(data, status, headers, config)
         {
             $scope.posts = data;
@@ -21,6 +22,14 @@ app.controller("PostsCtrl", function($scope, $http)
         {
             alert(status);
         });
+
+    $scope.showDataElement = function(event)
+    {
+        var el = event.target;
+        console.log(el.id);
+        $nextElem = $("[id='" + el.id + "']").next();
+        $nextElem.slideToggle(animationSpeed);
+    }
 });
 
 document.getElementById('searchBar').onkeypress = function(event)
@@ -69,7 +78,7 @@ function queryAPI(pageNr)
         {
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
-        url: url + '?pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
+        url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
         success: function(data)
         {
             var scope = angular.element($("#hereBeDragons")).scope();
@@ -216,4 +225,25 @@ function makePageNav(pageInfo)
 }
 
 
+/*
+$(".panel-heading").click(function ()
+{
+    alert(" Yo ");
+    $header = $(this);
+    //getting the next element
+    $content = $header.next();
+    //open up the content needed - toggle the slide- if visible, slide up, if not slidedown.
+    $content.slideToggle(500);
 
+    //, function () {
+        //execute this after slideToggle is done
+        //change text of header based on visibility of content div
+     //   $header.text(function ()
+     //   {
+            //change text based on condition
+     //       return $content.is(":visible") ? "Collapse" : "Expand";
+     //   });
+    //});
+
+});
+*/
