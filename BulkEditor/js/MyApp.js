@@ -1,10 +1,22 @@
 var app = angular.module("MyApp", []);
-var url = 'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements.json?fields=*';
+var corsProxy = 'http://www.corsproxy.com/';
+//var corsProxy = 'http://';
+var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
+var baseURL = corsProxy + "inf5750-12.uio.no/api/dataElements";
 var elementsPerPage = "20";
 var currentParam = "";
 var searchString = "";
 var ENTER_KEY = 13;
 var animationSpeed = 250;
+var loaded = false;
+
+app.filter('kuk', function()
+{
+    return function(input)
+    {
+        return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+    };
+});
 
 app.controller("PostsCtrl", function($scope, $http)
 {
@@ -15,6 +27,7 @@ app.controller("PostsCtrl", function($scope, $http)
         {
             $scope.posts = data;
             $scope.pageInfo = data.pager;
+
             $scope.totalNrOfElements = "(" + data.pager.total + " total)";
             makePageNav(data.pager);
         }).
@@ -25,12 +38,64 @@ app.controller("PostsCtrl", function($scope, $http)
 
     $scope.showDataElement = function(event)
     {
+        loadListeners();
+
         var el = event.target;
-        console.log(el.id);
-        $nextElem = $("[id='" + el.id + "']").next();
+        $parent = $("[id='" + el.id + "']");
+        $nextElem = $parent.next();
         $nextElem.slideToggle(animationSpeed);
     }
+
+    $scope.delElement = function(id, name)
+    {
+        var r = confirm("Are you sure you want to delete " + name + "?");
+        if (r === true)
+            httpDelete(id);
+    }
+
 });
+
+
+function httpDelete(id)
+{
+    $("body").css("cursor", "progress"); //Sets busy cursor while querying API
+    $.ajax({
+        type:"DELETE",
+        beforeSend: function (request)
+        {
+            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+        },
+        url: baseURL + "/" + id,
+        success: function(data)
+        {
+            $("body").css("cursor", "default"); //Restore cursor when done
+            $("#successDiv").slideToggle(0);
+        },
+        error:function(data, status)
+        {
+            $("body").css("cursor", "default"); //Restore cursor when done
+            $(".alertDiv").slideToggle(0);
+        }
+    });
+
+}
+
+
+function loadListeners()
+{
+    if(loaded) return;
+
+    $(".dropdown-menu li a").click(
+        function()
+        {
+            //alert("asoijhd");
+            var selText = $(this).text();
+            $(this).parents('.btn-group').find('.dropdown-toggle').html(selText+' <span class="caret"></span>');
+        }
+    );
+    loaded = true;
+}
+
 
 document.getElementById('searchBar').onkeypress = function(event)
 {
@@ -71,6 +136,8 @@ function search()
  */
 function queryAPI(pageNr)
 {
+    loaded = false;
+
     $("body").css("cursor", "progress"); //Sets busy cursor while querying API
     $.ajax({
         type:"GET",

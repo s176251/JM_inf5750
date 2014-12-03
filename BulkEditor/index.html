@@ -12,6 +12,20 @@
 </head>
 <body id="hereBeDragons" ng-controller="PostsCtrl">
 
+<div class="alertDiv">
+    <div class="alert alert-danger">
+        <span class="close" data-dismiss="alert">&times;</span>
+        <strong>Error!</strong> Could not contact the server! No element was deleted.
+    </div>
+</div>
+
+<div id="successDiv">
+    <div class="alert alert-success">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Success!</strong> The element was deleted!
+    </div>
+</div>
+
 <div class="input-group">
     <input type="text" class="form-control" id="searchBar" autocomplete="on">
     <span class="input-group-btn">
@@ -26,7 +40,7 @@
     <div class="list-group" ng-repeat="post in posts.dataElements">
        <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
         <div class="panel panel-default">
-            <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}</div>
+            <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}<span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span></div>
             <div class="panel-body">
                 <div class="input-group">
                     <span class="input-group-addon">Name</span>
@@ -45,7 +59,7 @@
 
                 <div class="input-group">
                     <span class="input-group-addon">Description:</span>
-                    <input type="text" class="form-control" value="{{post.description}}">
+                    <textarea rows="4" cols="50" class="form-control">{{post.description}}</textarea>
                 </div>
 
                 <div class="input-group">
@@ -54,9 +68,15 @@
                 </div>
 
                 <div class="input-group">
-                    <span class="input-group-addon">Domain type:</span>
-                    <input type="text" class="form-control" value="{{post.domainType}}">
-                </div>
+                     <span class="input-group-addon">Domain type:</span>
+                     <div class="btn-group">
+                         <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | kuk}}<span class="caret"></span></a>
+                         <ul class="dropdown-menu">
+                             <li><a>Aggregate</a></li>
+                             <li><a>Tracker</a></li>
+                         </ul>
+                     </div>
+                 </div>
 
                 <div class="input-group">
                     <span class="input-group-addon">Value type</span>

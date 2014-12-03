@@ -1,12 +1,12 @@
 {
     "version": "0.1",
-    "name": "Data Bulk Editor",
+    "name": "Data Elements Bulk Editor JM",
     "description": "A data bulk editor",
     "launch_path": "/index.html",
     "icons": {
-        "16": "/img/icons/mortar-16.png",
-        "48": "/img/icons/mortar-48.png",
-        "128": "/img/icons/mortar-128.png"
+        "16": "/img/icons/16.png",
+        "48": "/img/icons/48.png",
+        "128": "/img/icons/128.png"
     },
     "developer": {
         "name": "JM inf5750",
