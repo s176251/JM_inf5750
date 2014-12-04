@@ -1,6 +1,6 @@
 {
-    "version": "0.1",
-    "name": "Data Elements Bulk Editor JM",
+    "version": "0.7",
+    "name": "Data Elements Bulk Editor",
     "description": "A data bulk editor",
     "launch_path": "/index.html",
     "icons": {

@@ -44,3 +44,12 @@ body
 {
     display: none;
 }
+
+.duplicateButton
+{
+    float: right;
+    cursor: pointer;
+    height: 1.2em;
+    margin-right: 0.7em;
+    margin-left: 0.7em;
+}

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title>Data Elements Bulk Editor</title>
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/internalStyle.css" rel="stylesheet">
@@ -13,14 +13,10 @@
 
 <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addNew">Add new</button>
 
-<div ng-controller="PostsCtrl">
-    <div class="alertDiv">
-        <div class="alert alert-danger">
-            <span class="close" data-dismiss="alert">&times;</span>
-            <strong>Error!</strong> Could not contact the server! No element was deleted.
-        </div>
-    </div>
+<div id="mainContent" ng-controller="PostsCtrl">
 
+<!--
+-->
     <div id="successDiv">
         <div class="alert alert-success">
             <a href="#" class="close" data-dismiss="alert">&times;</a>
@@ -42,7 +38,10 @@
         <div class="list-group" ng-repeat="post in posts.dataElements">
             <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
             <div class="panel panel-default">
-                <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}<span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span></div>
+                <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}
+                                                                                                <span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
+                                                                                                <img src="img/icons/copy_blue.png" class="duplicateButton" ng-click="duplicateElement(post)" \>
+                </div>
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon">Name</span>
@@ -72,7 +71,7 @@
                     <div class="input-group">
                         <span class="input-group-addon">Domain type:</span>
                         <div class="btn-group">
-                            <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | kuk}}<span class="caret"></span></a>
+                            <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | capitalize}}<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a>Aggregate</a></li>
                                 <li><a>Tracker</a></li>
@@ -162,6 +161,14 @@
                     <h3 id ="mod-lab1">Add a new data element</h3>
                 </div>
                 <div class="modal-body">
+                    <!-- Moved the error div here, move around as you please, or use the new one we made, #errorModal (scroll down)-->
+                    <div class="alertDiv">
+                        <div class="alert alert-danger">
+                            <span class="close" data-dismiss="alert">&times;</span>
+                            <strong>Error!</strong> Could not contact the server! No element was deleted.
+                        </div>
+                    </div>
+
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
                             <label for="inputName" class="col-sm-2 control-label">Name</label>
@@ -258,6 +265,19 @@
         </div>
     </div>
 </div>
+
+<!-- Warning modal dialog -->
+<div id="notifyModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="notifyModalTitle"></h4>
+            </div>
+            <div id="notifyModalContent" class="modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

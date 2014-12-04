@@ -1,6 +1,6 @@
 var app = angular.module("MyApp", []);
-var corsProxy = 'http://www.corsproxy.com/';
-//var corsProxy = 'http://';
+//var corsProxy = 'http://www.corsproxy.com/'; //For testing
+var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + "inf5750-12.uio.no/api/dataElements";
 var elementsPerPage = "20";
@@ -9,8 +9,13 @@ var searchString = "";
 var ENTER_KEY = 13;
 var animationSpeed = 250;
 var loaded = false;
+TypeEnum = {
+    ERROR: "Error",
+    SUCCESS: "Success",
+    INFO: "Info"
+}
 
-app.filter('kuk', function()
+app.filter('capitalize', function()
 {
     return function(input)
     {
@@ -49,18 +54,55 @@ app.controller("PostsCtrl", function($scope, $http)
     $scope.delElement = function(id, name)
     {
         var r = confirm("Are you sure you want to delete " + name + "?");
-        if (r === true)
-            httpDelete(id);
+        if (r === true) deleteElement(id);
     }
 
+    $scope.duplicateElement = function(element)
+    {
+        if(searchString.length === 0) //Empty query, use default.
+        {
+            var currentPage = $scope.posts.pager.page;
+            if($scope.posts.length === 1)
+            {
+                currentPage -= 1;
+                if(currentPage < 1) currentPage = 1;
+            }
+            saveNewElement(angular.toJson(copyElement(element)), function(){ queryAPI(currentPage)}, function(){ displayNotifyModal(TypeEnum.ERROR, "Duplicate failed, for unknown reasons.")});
+        }
+        else
+        {
+            saveNewElement(angular.toJson(copyElement(element)),  function(){ queryAPI(-1) }, function(){ displayNotifyModal(TypeEnum.ERROR, "Duplicate failed, for unknown reasons.")});
+        }
+    }
 });
+
+function copyElement(original)
+{
+    var newElement = {};
+    var copyName = "_copy" + Math.floor((Math.random() * 100000));
+    newElement.name = original.name + copyName;
+    newElement.shortName = original.shortName + copyName;
+    newElement.aggregationLevels = original.aggregationLevels;
+    newElement.aggregationOperator = original.aggregationOperator;
+    newElement.attributeValues = original.attributeValues;
+    newElement.dataElementGroups = original.dataElementGroups;
+    newElement.dataSets = original.dataSets;
+    newElement.domainType = original.domainType;
+    newElement.externalAccess = original.externalAccess;
+    newElement.items = original.items;
+    newElement.numberType = original.numberType;
+    newElement.type = original.type;
+    newElement.url = original.url;
+    newElement.userGroupAccesses = original.userGroupAccesses;
+    return newElement;
+}
 
 
 app.controller("AddCtrl", function($scope) {
     $scope.input = {};
-    $scope.domainTypes = ['Aggregate', 'Tracket']
+    $scope.domainTypes = ['Aggregate', 'Tracker']
     $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name']
-    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Intger', 'Positive or Zero Integer', 'Unit Integer', 'Percentage']
+    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage']
     $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', '']
 
     $scope.saveData = function() {   
@@ -117,9 +159,15 @@ function generateValidJson(input)
 
 /**
  * TODO: Test!, fix the success/alert divs
+ * TODO: We made a new modal-type error and success-message, but two modal windows cant be displayed at the same time, so we didn't change yours, but moved it.
+ * NB: we removed JSON.stringify, because it fucked up all the json posting. //JSON.stringify()
  */
-function saveNewElement(newElement)
+function saveNewElement(newElement, successCallback, errorCallback)
 {
+    console.log(newElement);
+    console.log(successCallback);
+    console.log(errorCallback);
+
     $("body").css("cursor", "progress"); //Sets busy cursor while querying API 
     $.ajax({
         type:"POST",
@@ -128,23 +176,30 @@ function saveNewElement(newElement)
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
         url: baseURL,
-        data: JSON.stringify(newElement),
-        contentType: "application/json; charset=utf-8",
+        data: newElement,
+        contentType: "application/json", //; charset=utf-8
         success: function(data)
         {
-            $("body").css("curson", "default"); //Restore cursor when done 
-            $("#successDiv").slideToggle(0);
+            $("body").css("cursor", "default"); //Restore cursor when done
+
+            if(successCallback) successCallback();
+            else $("#successDiv").slideToggle(0);
         },          
         error: function(data, status)
         {
             $("body").css("cursor", "default"); //Restore cursor when done
-            $(".alertDiv").slideToggle(0);
+            if(errorCallback) errorCallback();
+            else $(".alertDiv").slideToggle(0);
         }
     });
 }
 
-
-function httpDelete(id)
+/**
+ * Deletes a data element from the server, by sending a Http Delete request.
+ * Also handles removing of the element in the displayed list and any messages to the user.
+ * @param id Id of element to delete and remove
+ */
+function deleteElement(id)
 {
     $("body").css("cursor", "progress"); //Sets busy cursor while querying API
     $.ajax({
@@ -154,28 +209,75 @@ function httpDelete(id)
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
         url: baseURL + "/" + id,
-        success: function(data)
+        success: function(data, status)
         {
+            console.log(status);
             $("body").css("cursor", "default"); //Restore cursor when done
-            $("#successDiv").slideToggle(0);
+            removeElementFromList(id);
+            displayNotifyModal(TypeEnum.SUCCESS, "The element with id=" + id + " was safely deleted from the server.");
         },
         error:function(data, status)
         {
             $("body").css("cursor", "default"); //Restore cursor when done
-            $(".alertDiv").slideToggle(0);
+            displayNotifyModal(TypeEnum.ERROR, "Could not contact the server! No element was deleted.");
         }
     });
 }
 
+/**
+ * Displays a generic notification to the user as a modal window.
+ * @param type Type of window (see TypeEnum)
+ * @param text Text to display
+ */
+function displayNotifyModal(type, text)
+{
+    $("#notifyModalTitle").html(type + "!");
+    if(type === TypeEnum.ERROR)
+    {
+        $("#notifyModalContent").html('<div class="alert alert-danger"><strong>Error! </strong>' + text + '</div>');
+        $("#notifyModal").modal('toggle');
+    }
+    else if(type === TypeEnum.SUCCESS)
+    {
+        $("#notifyModalContent").html('<div class="alert alert-success"><strong>Success! </strong>' + text + '</div>');
+        $("#notifyModal").modal('toggle');
+    }
+    else
+    {
+        console.log("Lol, too few or incorrect arguments used when calling displayModal(..)");
+    }
+}
 
+/**
+ * Removes an element from the underlying array of the main data-element list.
+ * @param id ID of element to remove.
+ */
+function removeElementFromList(id)
+{
+    var scope = angular.element($("#mainContent")).scope();
+    for(var i = 0; i < scope.posts.dataElements.length; i++)
+    {
+        if(scope.posts.dataElements[i].id === id)
+        {
+            scope.$apply( function()
+            {
+                scope.posts.dataElements.splice(i, 1);
+            });
+        }
+    }
+}
+
+/**
+ * Creates click-listeners for various purposes.
+ */
 function loadListeners()
 {
-    if(loaded) return;
+    if(loaded) return; //The loaded variable ensures that the event-binding is only done once.
 
+    //Handles changing of text in bootstrap-style dropdown-menus, which were originally designed for only displaying a group of links.
     $(".dropdown-menu li a").click(
         function()
         {
-            //alert("asoijhd");
             var selText = $(this).text();
             $(this).parents('.btn-group').find('.dropdown-toggle').html(selText+' <span class="caret"></span>');
         }
@@ -235,7 +337,7 @@ function queryAPI(pageNr)
         url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
         success: function(data)
         {
-            var scope = angular.element($("#hereBeDragons")).scope();
+            var scope = angular.element($("#mainContent")).scope();
             scope.$apply(function()
             {
                 if(pageNr > 0)
