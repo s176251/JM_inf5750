@@ -56,6 +56,94 @@ app.controller("PostsCtrl", function($scope, $http)
 });
 
 
+app.controller("AddCtrl", function($scope) {
+    $scope.input = {};
+    $scope.domainTypes = ['Aggregate', 'Tracket']
+    $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name']
+    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Intger', 'Positive or Zero Integer', 'Unit Integer', 'Percentage']
+    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', '']
+
+    $scope.saveData = function() {   
+        console.log("adding new element!");
+    }
+
+    $scope.close = function() {
+        $scope.input = {}; // Empty on cancel 
+        console.log("test!");
+    }
+
+    $scope.add = function() {
+        // TODO Input validation, careate JASON and post
+        console.log("DEBUG add");
+       
+        //saveNewElement(angular.toJson($scope.element));       
+        saveNewElement(angular.toJson(generateValidJson($scope.input)));
+
+        $scope.input = {};
+    }
+
+});
+
+/**
+ * Takes the input from the "New element" modal and tries a valid DHIS2 data element json
+ */
+function generateValidJson(input)
+{
+    var output = {};
+
+    if (input.name !== null) output.name = input.name;
+    
+    if (input.shortName !== null) output.shortName = input.shortName;
+    else output.shortName = input.name;
+
+    // Faking the rest for now.
+    output.aggregationLevels = []; 
+    output.aggregationOperator = "sum";
+    output.attributeValues = [];
+    output.dataElementGroups = []; 
+    output.dataSets = [];
+    output.domainType = "AGGREGATE";
+    output.externalAccess = false;
+    output.items = [];
+    output.numberType = "number";
+    output.type = "int";
+    output.url = "www.google.com";
+    output.userGroupAccesses = [];
+    output.zeroIsSignificant = false;
+
+    return output;
+}
+
+
+/**
+ * TODO: Test!, fix the success/alert divs
+ */
+function saveNewElement(newElement)
+{
+    $("body").css("cursor", "progress"); //Sets busy cursor while querying API 
+    $.ajax({
+        type:"POST",
+        beforeSend: function (request)
+        {
+            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+        },
+        url: baseURL,
+        data: JSON.stringify(newElement),
+        contentType: "application/json; charset=utf-8",
+        success: function(data)
+        {
+            $("body").css("curson", "default"); //Restore cursor when done 
+            $("#successDiv").slideToggle(0);
+        },          
+        error: function(data, status)
+        {
+            $("body").css("cursor", "default"); //Restore cursor when done
+            $(".alertDiv").slideToggle(0);
+        }
+    });
+}
+
+
 function httpDelete(id)
 {
     $("body").css("cursor", "progress"); //Sets busy cursor while querying API
@@ -77,7 +165,6 @@ function httpDelete(id)
             $(".alertDiv").slideToggle(0);
         }
     });
-
 }
 
 

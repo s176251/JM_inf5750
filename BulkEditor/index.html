@@ -8,145 +8,257 @@
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/internalStyle.css" rel="stylesheet">
-
 </head>
-<body id="hereBeDragons" ng-controller="PostsCtrl">
+<body id="hereBeDragons" ng-app>
 
-<div class="alertDiv">
-    <div class="alert alert-danger">
-        <span class="close" data-dismiss="alert">&times;</span>
-        <strong>Error!</strong> Could not contact the server! No element was deleted.
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addNew">Add new</button>
+
+<div ng-controller="PostsCtrl">
+    <div class="alertDiv">
+        <div class="alert alert-danger">
+            <span class="close" data-dismiss="alert">&times;</span>
+            <strong>Error!</strong> Could not contact the server! No element was deleted.
+        </div>
     </div>
+
+    <div id="successDiv">
+        <div class="alert alert-success">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>Success!</strong> The element was deleted!
+        </div>
+    </div>
+
+    <div class="input-group">
+        <input type="text" class="form-control" id="searchBar" autocomplete="on">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+        </span>
+    </div>
+
+    <div class="listContainer">
+        <div class="panel panel-info" id="lst-dataEle">
+            <div class="panel-heading" ng-init="totalNrOfElements='()'">Data Elements {{totalNrOfElements}}</div>
+        </div>
+        <div class="list-group" ng-repeat="post in posts.dataElements">
+            <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
+            <div class="panel panel-default">
+                <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}<span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span></div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">Name</span>
+                        <input type="text" class="form-control" value="{{post.name}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Short name:</span>
+                        <input type="text" class="form-control" value="{{post.shortName}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Code:</span>
+                        <input type="text" class="form-control" value="{{post.code}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Description:</span>
+                        <textarea rows="4" cols="50" class="form-control">{{post.description}}</textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Form name:</span>
+                        <input type="text" class="form-control" value="{{post.formName}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Domain type:</span>
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | kuk}}<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a>Aggregate</a></li>
+                                <li><a>Tracker</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Value type</span>
+                        <input type="text" class="form-control" value="{{post.type}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Number type:</span>
+                        <input type="text" class="form-control" value="{{post.numberType}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Aggregation Operator:</span>
+                        <input type="text" class="form-control" value="{{post.aggregationOperator}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Store zero values:</span>
+                        <input type="text" class="form-control" value="{{post.zeroIsSignificant}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">URL</span>
+                        <input type="text" class="form-control" value="{{post.url}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Category combination:</span>
+                        <input type="text" class="form-control" value="{{post.categoryCombo.name}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Option set for data values:</span>
+                        <input type="text" class="form-control" value="{{post.optionSet.name}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Option set for comments:</span>
+                        <input type="text" class="form-control" value="{{post.commentOptionSet.name}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Legend set</span>
+                        <input type="text" class="form-control" value="{{post.legendSet.name}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Aggregation Levels</span>
+                        <input type="text" class="form-control" value="{{post.aggregationLevels}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Rationale</span>
+                        <input type="text" class="form-control" value="{{post.attributeValues[1].value}}">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">Unit of measure</span>
+                        <input type="text" class="form-control" value="{{post.attributeValues[0].value}}">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <ul class="pagination" id="pageNavigator">
+        </ul>
+    </nav>
 </div>
 
-<div id="successDiv">
-    <div class="alert alert-success">
-        <a href="#" class="close" data-dismiss="alert">&times;</a>
-        <strong>Success!</strong> The element was deleted!
-    </div>
-</div>
 
-<div class="input-group">
-    <input type="text" class="form-control" id="searchBar" autocomplete="on">
-    <span class="input-group-btn">
-        <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
-    </span>
-</div>
-
-<div class="listContainer">
-    <div class="panel panel-info" id="lst-dataEle">
-        <div class="panel-heading" ng-init="totalNrOfElements='()'">Data Elements {{totalNrOfElements}}</div>
-    </div>
-    <div class="list-group" ng-repeat="post in posts.dataElements">
-       <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
-        <div class="panel panel-default">
-            <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}<span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span></div>
-            <div class="panel-body">
-                <div class="input-group">
-                    <span class="input-group-addon">Name</span>
-                    <input type="text" class="form-control" value="{{post.name}}">
+<!-- Add new element modal part -->
+<div ng-controller="AddCtrl"> 
+    <div id="addNew" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mod-lab1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                 <div class="modal-header">  
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="close()">X</button>
+                    <h3 id ="mod-lab1">Add a new data element</h3>
                 </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="inputName" class="col-sm-2 control-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputName" ng-model="input.name">
+                            </div>
+                        </div>
+                        <div class="form-group">  
+                            <label for="inputShortName" class="col-sm-2 control-label">Short name</label>  
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputShortName" ng-model="input.shortName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputCode" class="col-sm-2 control-label">Code</label>
+                            <div class="col-sm-10">
+                                <input type="textField" class="form-control" id="inputCode" ng-model="input.code">  
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputDescription" class="col-sm-2 control-label">Description</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" rows="3" id="inputDescription" ng-model="input.description"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputFormName" class="col-sm-2 control-label">Form name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputFormName" ng-model="input.formName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputDomainType" class="col-sm-2 control-label">Domain Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="inputDomainType" ng-model="input.domainType" ng-options="o for o in domainTypes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputValueType" class="col-sm-2 control-label">Value Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="input" ng-model="input.valueType" ng-options="o for o in valueTypes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="element.valueType === 'Number'">
+                            <label for="inputNumberType" class="col-sm-2 control-label">Number Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="input" ng-model="input.numberType" ng-options="o for o in numberTypes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputAggregateOperators" class="col-sm-2 control-label">Aggregate Operator</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="inputAggreagteOperations" ng-model="input.aggregateOperators" ng-options="o for o in aggregateOpers"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputStoreZeroDataValues" class="col-sm-2 control-label">Store Zero Data Values</label>
+                            <div class="col-sm-10" >
+                                <select ng-disabled="element.aggregateOperators !== 'Sum'" class="form-control" id="inputStoreZeroDataValues" ng-model="input.storeZeroDataValues" ng-options="o for o in ['No', 'Yes']"></select>
+                            </div>
+                        </div>
 
-                <div class="input-group">
-                    <span class="input-group-addon">Short name:</span>
-                    <input type="text" class="form-control" value="{{post.shortName}}">
+
+                        <div class="form-group">
+                            <label for="inputUrl" class="col-sm-2 control-label">Url</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" id="inputUrl" ng-model="input.url">
+                            </div>
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <label for="inputRationale" class="col-sm-2 control-label">Rationale</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputRationale" ng-model="input.rationale">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUnitOfMeasure" class="col-sm-2 control-label">Unit of Measure</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputUnitOfMeasure" ng-model="input.unitOfMeasure">
+                            </div>
+                        </div>
+
+                        <!-- TODO! Data Element Groups -->
+                    </form>
+                    <pre>form= {{element | json}}</pre>
                 </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Code:</span>
-                    <input type="text" class="form-control" value="{{post.code}}">
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="close()">Close</button>
+                    <button class="btn btn-success" data-dismiss="modal" type="submit" aria-hidden="true" ng-click="add()">Add new</button>
                 </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Description:</span>
-                    <textarea rows="4" cols="50" class="form-control">{{post.description}}</textarea>
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Form name:</span>
-                    <input type="text" class="form-control" value="{{post.formName}}">
-                </div>
-
-                <div class="input-group">
-                     <span class="input-group-addon">Domain type:</span>
-                     <div class="btn-group">
-                         <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | kuk}}<span class="caret"></span></a>
-                         <ul class="dropdown-menu">
-                             <li><a>Aggregate</a></li>
-                             <li><a>Tracker</a></li>
-                         </ul>
-                     </div>
-                 </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Value type</span>
-                    <input type="text" class="form-control" value="{{post.type}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Number type:</span>
-                    <input type="text" class="form-control" value="{{post.numberType}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Aggregation Operator:</span>
-                    <input type="text" class="form-control" value="{{post.aggregationOperator}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Store zero values:</span>
-                    <input type="text" class="form-control" value="{{post.zeroIsSignificant}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">URL</span>
-                    <input type="text" class="form-control" value="{{post.url}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Category combination:</span>
-                    <input type="text" class="form-control" value="{{post.categoryCombo.name}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Option set for data values:</span>
-                    <input type="text" class="form-control" value="{{post.optionSet.name}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Option set for comments:</span>
-                    <input type="text" class="form-control" value="{{post.commentOptionSet.name}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Legend set</span>
-                    <input type="text" class="form-control" value="{{post.legendSet.name}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Aggregation Levels</span>
-                    <input type="text" class="form-control" value="{{post.aggregationLevels}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Rationale</span>
-                    <input type="text" class="form-control" value="{{post.attributeValues[1].value}}">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon">Unit of measure</span>
-                    <input type="text" class="form-control" value="{{post.attributeValues[0].value}}">
-                </div>
-
             </div>
         </div>
     </div>
 </div>
 
-<nav>
-    <ul class="pagination" id="pageNavigator">
-    </ul>
-</nav>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
