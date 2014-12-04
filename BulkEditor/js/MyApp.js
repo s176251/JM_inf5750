@@ -1,6 +1,6 @@
 var app = angular.module("MyApp", []);
-//var corsProxy = 'http://www.corsproxy.com/'; //For testing
-var corsProxy = 'http://'; //For deployment
+var corsProxy = 'http://www.corsproxy.com/'; //For testing
+//var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + "inf5750-12.uio.no/api/dataElements";
 var elementsPerPage = "20";

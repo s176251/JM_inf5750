@@ -3,9 +3,10 @@
     margin-bottom: 0px;
 }
 
-body
+#hereBeDragons
 {
-    margin: 50px;
+    margin: 5%;
+    margin-top:0px;
 }
 
 .listContainer .panel-body {
@@ -45,6 +46,13 @@ body
     display: none;
 }
 
+#addNewButton
+{
+    float:right;
+    height: 2.8em;
+    margin-left: 0.5em;
+}
+
 .duplicateButton
 {
     float: right;
@@ -52,4 +60,26 @@ body
     height: 1.2em;
     margin-right: 0.7em;
     margin-left: 0.7em;
+}
+
+#searchDiv
+{
+    margin-bottom: 1em;
+}
+
+/*---------------------------------Banner*/
+
+#bannerImg
+{
+    margin-left: 5%;
+}
+
+#bannerText
+{
+    position: absolute;
+    font-size: 3.5em;
+    display: inline;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+
 }

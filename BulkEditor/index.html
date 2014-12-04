@@ -9,9 +9,16 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/internalStyle.css" rel="stylesheet">
 </head>
-<body id="hereBeDragons" ng-app>
+<body ng-app>
 
-<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addNew">Add new</button>
+<div>
+    <img src="img/icons/128.png" id="bannerImg"/>
+    <div id="bannerText">Data Elements Bulk Editor</div>
+</div>
+
+<div id="hereBeDragons">
+
+<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addNew" id="addNewButton">Add new</button>
 
 <div id="mainContent" ng-controller="PostsCtrl">
 
@@ -24,7 +31,7 @@
         </div>
     </div>
 
-    <div class="input-group">
+    <div class="input-group" id="searchDiv">
         <input type="text" class="form-control" id="searchBar" autocomplete="on">
         <span class="input-group-btn">
             <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
@@ -39,8 +46,8 @@
             <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
             <div class="panel panel-default">
                 <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}
-                                                                                                <span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
-                                                                                                <img src="img/icons/copy_blue.png" class="duplicateButton" ng-click="duplicateElement(post)" \>
+                                                                                                <span class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
+                                                                                                <img src="img/icons/copy_blue.png" title="Duplicate" class="duplicateButton" ng-click="duplicateElement(post)" \>
                 </div>
                 <div class="panel-body">
                     <div class="input-group">
@@ -286,5 +293,6 @@
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/angular.min.js"></script>
 <script type="text/javascript" src="js/MyApp.js"></script>
+</div>
 </body>
 </html>
