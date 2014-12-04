@@ -83,3 +83,18 @@
     padding-left: 0.5em;
 
 }
+
+/*New element help text*/
+.form-group .help-block {
+  display: none;
+}
+
+.form-group.has-error .help-block {
+  display: block;
+}
+
+/* Add a red asterisk to required fields */
+.form-group.required .control-label:after { 
+   content:"*";
+   color:red;
+}

@@ -103,6 +103,7 @@ app.controller("AddCtrl", function($scope) {
     $scope.domainTypes = ['Aggregate', 'Tracker']
     $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name']
     $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage']
+    $scope.textTypes = ['Text', 'Long text'],
     $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', '']
 
     $scope.saveData = function() {   
@@ -117,17 +118,58 @@ app.controller("AddCtrl", function($scope) {
     $scope.add = function() {
         // TODO Input validation, careate JASON and post
         console.log("DEBUG add");
-       
-        //saveNewElement(angular.toJson($scope.element));       
-        saveNewElement(angular.toJson(generateValidJson($scope.input)));
 
-        $scope.input = {};
+        $scope.showErrorsCheckValidity = true;
+        if ($scope.aForm.$valid) {
+            $('.modal').modal('hide');
+            displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");
+        } else {
+            displayNotifyModal(TypeEnum.ERROR, "There are invalid fields!");
+        }
+
+        //saveNewElement(angular.toJson($scope.element));       
+        //saveNewElement(angular.toJson(generateValidJson($scope.input)));
+
+        //$scope.input = {};
     }
 
 });
 
 /**
- * Takes the input from the "New element" modal and tries a valid DHIS2 data element json
+ * Directiv controlling the validation after input.
+ * From the guide at http://blog.yodersolutions.com/bootstrap-form-validation-done-right-in-angularjs/
+ */
+app.directive('showErrors', function() {
+    return {
+      restrict: 'A',
+      require:  '^form',
+      link: function (scope, el, attrs, formCtrl) {
+        // find the text box element, which has the 'name' attribute
+        var inputEl   = el[0].querySelector("[name]");
+        // convert the native text box element to an angular element
+        var inputNgEl = angular.element(inputEl);
+        // get the name on the text box so we know the property to check
+        // on the form controller
+        var inputName = inputNgEl.attr('name');
+
+        // only apply the has-error class after the user leaves the text box
+        inputNgEl.bind('blur', function() {
+          el.toggleClass('has-error', formCtrl[inputName].$invalid);
+        });
+
+        scope.$watch(function() {
+          return scope.showErrorsCheckValidity;
+        }, function(newVal, oldVal) {
+          if (!newVal) { return; }
+          el.toggleClass('has-error', formCtrl[inputName].$invalid);
+        });
+      }
+    }
+});
+
+
+/**
+ * Takes the input from the "New element" modal and tries to make a valid DHIS2 data element json
  */
 function generateValidJson(input)
 {
