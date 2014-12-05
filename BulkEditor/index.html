@@ -12,7 +12,7 @@
 <body ng-app>
 
 <div>
-    <img src="img/icons/128.png" id="bannerImg"/>
+    <a href="index.html"><img src="img/icons/128.png" id="bannerImg"/></a>
     <div id="bannerText">Data Elements Bulk Editor</div>
 </div>
 
@@ -40,14 +40,32 @@
 
     <div class="listContainer">
         <div class="panel panel-info" id="lst-dataEle">
-            <div class="panel-heading" ng-init="totalNrOfElements='()'">Data Elements {{totalNrOfElements}}</div>
+            <div class="panel-heading" ng-init="totalNrOfElements='()'">
+                                                                <table class="infoGroup">
+                                                                    <tr>
+                                                                        <td class="nameInfo"><span>Data Elements {{totalNrOfElements}}</span></td>
+                                                                        <td class="createdInfo"><span>Created by</span></td>
+                                                                        <td class="updatedInfo"><span id="sortModified" ng-click="sortAllByModified()">Last modified<span class="caret"></span></span></td>
+                                                                        <td class="actionsInfo"></td>
+                                                                    </tr>
+                                                                </table>
+            </div>
         </div>
         <div class="list-group" ng-repeat="post in posts.dataElements">
             <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
             <div class="panel panel-default">
-                <div class="panel-heading"  ng-click="showDataElement($event)" id="{{post.id}}">{{post.name}}
-                                                                                                <span class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
-                                                                                                <img src="img/icons/copy_blue.png" title="Duplicate" class="duplicateButton" ng-click="duplicateElement(post)" \>
+                <div class="panel-heading"  ng-click="showDataElement($event, post.id)" id="{{post.id}}">
+                                                                <table class="infoGroup">
+                                                                    <tr>
+                                                                        <td class="nameInfo"><span>{{post.name}}</span></td>
+                                                                        <td class="createdInfo"><span ng-if="post.user.name != null">{{post.user.name}}</span></td>
+                                                                        <td class="updatedInfo"><span>{{post.lastUpdated | toReadableDate}}</span></td>
+                                                                        <td  class="actionsInfo">
+                                                                            <span id="{{post.id}}del" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
+                                                                            <img id="{{post.id}}dup" src="img/icons/copy_blue.png" title="Duplicate" class="duplicateButton" ng-click="duplicateElement(post)" \>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                 </div>
                 <div class="panel-body">
                     <div class="input-group">

@@ -98,3 +98,29 @@
    content:"*";
    color:red;
 }
+
+.infoGroup
+{
+    width: 100%;
+}
+.nameInfo
+{
+    width: 40%;
+}
+.createdInfo
+{
+    width: 25%;
+}
+.updatedInfo
+{
+    width: 25%;
+}
+.actionsInfo
+{
+    width: 10%;
+}
+
+#sortModified
+{
+    cursor: pointer;
+}
