@@ -212,7 +212,7 @@
                             </div>
                         </div>
 
-                        <!--OK - FormName(java.lang.String)-->
+                        <!--OK - Form name(java.lang.String)-->
                         <div class="form-group" show-errors>
                             <label for="inputFormName" class="col-sm-2 control-label">Form name</label>
                             <div class="col-sm-10">
@@ -220,26 +220,27 @@
                             </div>
                         </div>
                         
-                        <!--OK - DomainType(org.hisp.dhis.dataelement.DataElementDomain)-->
+                        <!--OK - Domain type(org.hisp.dhis.dataelement.DataElementDomain), required-->
                         <div class="form-group required" show-errors>
                             <label for="inputDomainType" class="col-sm-2 control-label">Domain Type</label>
                             <div class="col-sm-10">
                                 <select class="form-control" name="domainType" id="inputDomainType" 
                                     ng-model="input.domainType" ng-options="o for o in domainTypes" required></select>
-                                <p class="help-block" ng-if="aForm.name.$error.required">You ned to chose a Domain type!</p>
+                                <p class="help-block" ng-if="aForm.domainType.$error.required">You ned to chose a Domain type!</p>
                             </div>
                         </div>
 
-                        <!--OK - Value Type (), required -->
+                        <!--OK - Value type (), required -->
                         <div class="form-group required" show-errors>
                             <label for="inputValueType" class="col-sm-2 control-label">Value Type</label>
                             <div class="col-sm-10">
                                 <select class="form-control" name="valueType" id="input" ng-model="input.valueType" 
                                     ng-options="o for o in valueTypes" required></select>
+                                <p class="help-block" ng-if="aForm.valueType.$error.required">You ned to chose a Value type!</p>
                             </div>
                         </div>
                         
-                        <!--OK? Number Type (), Only used if value type is 'number' -->
+                        <!--OK? Number type (), Only used if value type is 'number' -->
                         <div class="form-group" ng-show="input.valueType === 'Number'" show-errors>
                             <label for="inputNumberType" class="col-sm-2 control-label">Number Type</label>
                             <div class="col-sm-10">
@@ -248,35 +249,35 @@
                             </div>
                         </div>
                       
-                        <!--  
 
-                        <div class="form-group" ng-show="input.valueType === 'text'" show-errors>
+                        <!--OK? Text type (), Only used if value type is 'number' -->
+                        <div class="form-group" ng-show="input.valueType === 'Text'" show-errors>
                             <label for="inputTextType" class="col-sm-2 control-label">Text Type</label>
                             <div class="col-sm-10">
-                                <select class="form-control" name="textType" id="inputTextTypes"
-                                    ng-model="input.textType" ng-options="o for o textTypes"></select>
+                                <select class="form-control" name="textType" id="inputTextType"
+                                    ng-model="input.textType" ng-options="o for o in textTypes"></select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="inputAggregateOperators" class="col-sm-2 control-label">Aggregate Operator</label>
+                        
+                        <!-- AggregateOperator (), Only used if value type is 'number' -->
+                        <div class="form-group required" show-errors>
+                            <label for="inputAggregateOperator" class="col-sm-2 control-label">Aggregate Operator</label>
                             <div class="col-sm-10">
-                                <select class="form-control" 
-                                    id="inputAggreagteOperations" 
-                                    ng-model="input.aggregateOperators" 
-                                    ng-options="o for o in aggregateOpers"></select>
+                                <select class="form-control" name="aggregateOperations" id="inputAggreagteOperator" ng-disabled="(((input.valueType !== 'Number') || (input.valueType === 'Yes/No')) || ((input.valueType !== 'Yes/No') || (input.valueType === 'Number')))"
+                                    ng-model="input.aggregateOperators" ng-options="o for o in aggregateOpers" ng-required="input.valueType !== 'Text'"></select>
                             </div>
                         </div>
-                        <div class="form-group">
+                        
+                        <!--OK? store zero data values (), Only used if value type is 'number' -->
+                        <div class="form-group" show-errors>
                             <label for="inputStoreZeroDataValues" class="col-sm-2 control-label">Store Zero Data Values</label>
                             <div class="col-sm-10" >
-                                <select ng-disabled="element.aggregateOperators !== 'Sum'" 
-                                    class="form-control" 
-                                    id="inputStoreZeroDataValues" 
-                                    ng-model="input.storeZeroDataValues" 
-                                    ng-options="o for o in ['No', 'Yes']"></select>
+                                <select ng-disabled="(input.valueType === 'Number' && input.aggregateOperators !== 'Sum')" name="storeZeroDataValues"
+                                    class="form-control" id="inputStoreZeroDataValues" ng-model="input.storeZeroDataValues" ng-options="o for o in ['No', 'Yes']"></select>
                             </div>
                         </div>
 
+                        <!--  
 
                         <div class="form-group">
                             <label for="inputUrl" class="col-sm-2 control-label">Url</label>
