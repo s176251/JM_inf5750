@@ -1,6 +1,6 @@
 var app = angular.module("MyApp", []);
-var corsProxy = 'http://www.corsproxy.com/'; //For testing
-//var corsProxy = 'http://'; //For deployment
+//var corsProxy = 'http://www.corsproxy.com/'; //For testing
+var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + "inf5750-12.uio.no/api/dataElements";
 var elementsPerPage = "20";
@@ -9,6 +9,9 @@ var searchString = "";
 var ENTER_KEY = 13;
 var animationSpeed = 250;
 var loaded = false;
+var descendingModifiedSort = false;
+var useSearchPaging = false;
+
 TypeEnum = {
     ERROR: "Error",
     SUCCESS: "Success",
@@ -20,6 +23,15 @@ app.filter('capitalize', function()
     return function(input)
     {
         return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+    };
+});
+
+app.filter('toReadableDate', function()
+{
+    return function(input)
+    {
+        var d = new Date(input);
+        return d.toLocaleDateString() + " " + d.toLocaleTimeString();
     };
 });
 
@@ -41,14 +53,17 @@ app.controller("PostsCtrl", function($scope, $http)
             alert(status);
         });
 
-    $scope.showDataElement = function(event)
+    $scope.showDataElement = function(event, id)
     {
         loadListeners();
-
         var el = event.target;
-        $parent = $("[id='" + el.id + "']");
-        $nextElem = $parent.next();
-        $nextElem.slideToggle(animationSpeed);
+
+        if(el.id !== id + "del" && el.id !== id + "dup")
+        {
+            $parent = $("[id='" + id + "']");
+            $nextElem = $parent.next();
+            $nextElem.slideToggle(animationSpeed);
+        }
     }
 
     $scope.delElement = function(id, name)
@@ -73,6 +88,12 @@ app.controller("PostsCtrl", function($scope, $http)
         {
             saveNewElement(angular.toJson(copyElement(element)),  function(){ queryAPI(-1) }, function(){ displayNotifyModal(TypeEnum.ERROR, "Duplicate failed, for unknown reasons.")});
         }
+    }
+
+    $scope.sortAllByModified = function()
+    {
+        currentParam = parseSearchString("&query=");
+        queryAPI(-2);
     }
 });
 
@@ -352,9 +373,41 @@ function search()
     }
     else
     {
-        currentParam = "&query=" + searchString;
-        queryAPI(-1);
+        if(useSearchPaging)
+        {
+            currentParam = parseSearchString("&filter=name:like:");
+            queryAPI(1);
+        }
+        else
+        {
+            currentParam = parseSearchString("&query=");
+            queryAPI(-1);
+        }
+        console.log(currentParam);
     }
+}
+
+function parseSearchString(input)
+{
+    if(searchString.indexOf("user:") == 0)
+    {
+        var userName = "";
+        if(searchString.indexOf('"') === 5)
+        {
+            userName = searchString.substring(6, searchString.indexOf('"', 6));
+            return input + searchString.substring(searchString.indexOf('"', 6)+1).trim() + "&filter=user.name:like:" + userName;
+        }
+        else
+        {
+            var spaceIndex = searchString.indexOf(' ', 5);
+            if(spaceIndex === -1)
+                return input + "&filter=user.name:like:" + searchString.substring(5);
+
+            userName = searchString.substring(5, searchString.indexOf(' ', 5));
+            return input + searchString.substring(searchString.indexOf(' ', 5)).trim() + "&filter=user.name:like:" + userName;
+        }
+    }
+    return input + searchString;
 }
 
 /**
@@ -396,10 +449,33 @@ function queryAPI(pageNr)
                     scope.totalNrOfElements = "(" + data.dataElements.length + " total)";
                     document.getElementById('pageNavigator').innerHTML = "";
                 }
+                else if(pageNr === -2) //Display all elements by modified date
+                {
+                    sortResultsByModified(data.dataElements);
+                    scope.posts = data;
+                    scope.totalNrOfElements = "(" + data.dataElements.length + " total)";
+                    document.getElementById('pageNavigator').innerHTML = "";
+                }
             });
+            $("body").css("cursor", "default"); //Restore cursor when done
+        },
+        error: function()
+        {
             $("body").css("cursor", "default"); //Restore cursor when done
         }
     });
+}
+
+function sortResultsByModified(array)
+{
+    array.sort(function(a, b)
+    {
+        if(descendingModifiedSort)
+            return a.lastUpdated < b.lastUpdated ? -1 : (a.lastUpdated > b.lastUpdated ? 1 : 0);
+        else
+            return a.lastUpdated < b.lastUpdated ? 1 : (a.lastUpdated > b.lastUpdated ? -1 : 0);
+    });
+    descendingModifiedSort = !descendingModifiedSort;
 }
 
 /**
@@ -446,6 +522,7 @@ function sortResults(array)
         // Name contains query-string, alphabetical sort.
         return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0);
     });
+    descendingModifiedSort = false;
 }
 
 /**
