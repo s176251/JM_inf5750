@@ -178,7 +178,7 @@ app.controller("AddCtrl", function($scope) {
             $('.modal').modal('hide');
             displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");
         } else {
-            displayNotifyModal(TypeEnum.ERROR, "There are invalid fields!");
+            alert("There are invalid fields!");
         }
 
         //saveNewElement(angular.toJson($scope.element));       
@@ -252,7 +252,21 @@ function generateValidJson(input)
     return output;
 }
 
-
+/**
+ * Gets the JSON objects used to get options.
+ *
+ * Useses 'async: false'. This causes load time to
+ * increse some when using corsProxy. Hopefully the
+ * load time is lower when it's runned on DHIS2.
+ *
+ * The elementsPerPage = 1000 is a quickHack. 
+ * One could run into jsons lager then 1000..
+ * But as the data is used in creating dropdown menues
+ * such lage jsons are impractical.
+ *
+ * @param jsonURL
+ *      Url of the JSON.
+ */
 function getOptionsJSON(jsonURL)
 {
     elementsPerPage = 1000; //TODO set this dynamically

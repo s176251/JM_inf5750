@@ -181,21 +181,15 @@
 <!-- Add new element modal part -->
 <div ng-controller="AddCtrl"> 
     <div id="addNew" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mod-lab1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                  <div class="modal-header">  
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="close()">X</button>
                     <h3 id="mod-lab1">Add a new data element</h3>
                 </div>
                 <div class="modal-body">
-                    <!-- Moved the error div here, move around as you please, or use the new one we made, #errorModal (scroll down)-->
-                    <div class="alertDiv">
-                        <div class="alert alert-danger">
-                            <span class="close" data-dismiss="alert">&times;</span>
-                            <strong>Error!</strong> Could not contact the server! No element was deleted.
-                        </div>
-                    </div>
-
+                    <div class="alert alert-warning" role="alert">This object will be created with public edit and view rights</div>
+                    
                     <form class="form-horizontal" role="form" name="aForm" novalidate>
                         <h4 id="Det">Details</h4>
                         <hr>
