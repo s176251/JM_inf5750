@@ -185,7 +185,7 @@
             <div class="modal-content">
                  <div class="modal-header">  
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="close()">X</button>
-                    <h3 id ="mod-lab1">Add a new data element</h3>
+                    <h3 id="mod-lab1">Add a new data element</h3>
                 </div>
                 <div class="modal-body">
                     <!-- Moved the error div here, move around as you please, or use the new one we made, #errorModal (scroll down)-->
@@ -197,6 +197,8 @@
                     </div>
 
                     <form class="form-horizontal" role="form" name="aForm" novalidate>
+                        <h4 id="Det">Details</h4>
+                        <hr>
                         <!--OK - Name(java.lang.String), required-->
                         <div class="form-group required" show-errors>
                             <label for="inputName" class="col-sm-2 control-label">Name</label>
@@ -258,7 +260,7 @@
                             </div>
                         </div>
                         
-                        <!--OK? Number type (), Only used if value type is 'number' -->
+                        <!--OK Number type (), Only used if value type is 'number' -->
                         <div class="form-group" ng-show="input.valueType === 'Number'" show-errors>
                             <label for="inputNumberType" class="col-sm-2 control-label">Number Type</label>
                             <div class="col-sm-10">
@@ -268,7 +270,7 @@
                         </div>
                       
 
-                        <!--OK? Text type (), Only used if value type is 'number' -->
+                        <!--OK Text type (), Only used if value type is 'number' -->
                         <div class="form-group" ng-show="input.valueType === 'Text'" show-errors>
                             <label for="inputTextType" class="col-sm-2 control-label">Text Type</label>
                             <div class="col-sm-10">
@@ -281,45 +283,122 @@
                         <div class="form-group required" show-errors>
                             <label for="inputAggregateOperator" class="col-sm-2 control-label">Aggregate Operator</label>
                             <div class="col-sm-10">
-                                <select class="form-control" name="aggregateOperations" id="inputAggreagteOperator" ng-disabled="(((input.valueType !== 'Number') || (input.valueType === 'Yes/No')) || ((input.valueType !== 'Yes/No') || (input.valueType === 'Number')))"
-                                    ng-model="input.aggregateOperators" ng-options="o for o in aggregateOpers" ng-required="input.valueType !== 'Text'"></select>
+                                <select class="form-control" name="aggregateOperations" id="inputAggreagteOperator" 
+                                    ng-disabled="input.valueType !== 'Number' && input.valueType !== 'Yes/No'"
+                                    ng-model="input.aggregateOperator" ng-options="o for o in aggregateOpers" 
+                                    ng-required="input.valueType !== 'Text'"></select>
                             </div>
                         </div>
                         
-                        <!--OK? store zero data values (), Only used if value type is 'number' -->
+                        <!-- store zero data values (), Only used if value type is 'number' -->
                         <div class="form-group" show-errors>
                             <label for="inputStoreZeroDataValues" class="col-sm-2 control-label">Store Zero Data Values</label>
                             <div class="col-sm-10" >
-                                <select ng-disabled="(input.valueType === 'Number' && input.aggregateOperators !== 'Sum')" name="storeZeroDataValues"
-                                    class="form-control" id="inputStoreZeroDataValues" ng-model="input.storeZeroDataValues" ng-options="o for o in ['No', 'Yes']"></select>
+                                <select ng-disabled="input.valueType !== 'Number' || input.aggregateOperator !== 'Sum'" name="storeZeroDataValues"
+                                    class="form-control" id="inputStoreZeroDataValues" ng-model="input.storeZero" 
+                                    ng-options="o for o in storeZeros"></select>
                             </div>
                         </div>
 
-                        <!--  
-
-                        <div class="form-group">
+                        <!-- url (java.lang.String) -->
+                        <div class="form-group" shoe-errors>
                             <label for="inputUrl" class="col-sm-2 control-label">Url</label>
                             <div class="col-sm-10">
-                                <input class="form-control" id="inputUrl" ng-model="input.url">
+                                <input type="url" class="form-control" id="inputUrl" ng-model="input.url">
                             </div>
                         </div>
 
-                        
+                        <!-- TODO get options from JSON, Category Combination (org.hisp.dhis.dataelement.DataElementCategoryCombo), required -->
+                        <div class="form-group required" show-errors>
+                            <label for="inputCatComb" class="col-sm-2 control-label">Category Combination</label>
+                            <div class="col-sm-10" >
+                                <select name="catComb" class="form-control" id="inputCatComb" ng-model="input.catComb" 
+                                    ng-options="o as o.name for o in catCombs" required></select>
+                            </div>
+                        </div>
+ 
+                        <!--OK Option set for data values (org.hisp.dhis.option.OptionSet)-->
+                        <div class="form-group" show-errors>
+                            <label for="inputOptSet" class="col-sm-2 control-label">Option set for data values</label>
+                            <div class="col-sm-10" >
+                                <select name="optSet" class="form-control" id="inputOptSet" ng-model="input.optSet" 
+                                    ng-options="o as o.name for o in optSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--OK Option set for comments (org.hisp.dhis.option.OptionSet) -->
+                        <div class="form-group" show-errors>
+                            <label for="inputOptSetCom" class="col-sm-2 control-label">Option set for comments</label>
+                            <div class="col-sm-10" >
+                                <select name="optSetCom" class="form-control" id="inputOptSetCom" ng-model="input.optSetCom" 
+                                    ng-options="o as o.name for o in optSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--OK Legend set () -->
+                        <div class="form-group" show-errors>
+                            <label for="inputLegendSet" class="col-sm-2 control-label">Legend set</label>
+                            <div class="col-sm-10" >
+                                <select name="legendSet" class="form-control" id="inputLegendSet" ng-model="input.legendSet" 
+                                    ng-options="o as o.name for o in legendSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+
+                         <!-- Aggregation levels (java.lang.List) -->
+                        <div class="form-group">
+                            <label for="inputUrl" class="col-sm-2 control-label">Aggregation levels</label>
+                            <div class="col-sm-10">
+                                <input type="checkbox" ng-model="input.aggregationLevels"> 
+                            </div>
+                        </div>
+
+                        <!-- rational () ikke i schema? -->
                         <div class="form-group">
                             <label for="inputRationale" class="col-sm-2 control-label">Rationale</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="inputRationale" ng-model="input.rationale">
                             </div>
                         </div>
-                        <div class="form-group">
+
+                        <!-- unit of measure () ikke i schema? -->
+                        <div class="form-group" show-error>
                             <label for="inputUnitOfMeasure" class="col-sm-2 control-label">Unit of Measure</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="inputUnitOfMeasure" ng-model="input.unitOfMeasure">
                             </div>
-                        </div> -->
+                        </div>
 
-                        <!-- TODO! Data Element Groups -->
-                    </form>
+                        <h4 id="dEG">Data Element Groupps</h4>
+                        <hr>
+
+                        <!--OK Main data element groups ()-->
+                        <div class="form-group" show-errors>
+                            <label for="inputDataGroup" class="col-sm-2 control-label">Main data element groups</label>
+                            <div class="col-sm-10" >
+                                <select name="dataGroup" class="form-control" id="inputDataGroup" ng-model="input.dataGroup" 
+                                    ng-options="o as o.name for o in mainDataGroups">
+                                    <option value="">[Select group]</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--OK Tracker-based data()-->
+                        <div class="form-group" show-errors>
+                            <label for="inputTrackerData" class="col-sm-2 control-label">Tracker-based data</label>
+                            <div class="col-sm-10" >
+                                <select name="trackerData" class="form-control" id="inputTrackerData" ng-model="input.trackerData" 
+                                    ng-options="o as o.name for o in trackerBasedDatas">
+                                    <option value="">[Select group]</option>
+                                </select>
+                            </div>
+                        </div>
+                   </form>
                     <pre>form= {{input | json}}</pre>
                 </div>
                 <div class="modal-footer">

@@ -1,8 +1,13 @@
 var app = angular.module("MyApp", []);
-//var corsProxy = 'http://www.corsproxy.com/'; //For testing
-var corsProxy = 'http://'; //For deployment
+var corsProxy = 'http://www.corsproxy.com/'; //For testing
+//var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
-var baseURL = corsProxy + "inf5750-12.uio.no/api/dataElements";
+var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
+var optionSetURL = corsProxy + 'inf5750-12.uio.no/api/optionSets.json';
+var legendSetURL = corsProxy + 'inf5750-12.uio.no/api/mapLegendSets.json';
+var categoryCombosURL = corsProxy + 'inf5750-12.uio.no/api/categoryCombos.json';
+var mainDataElementGroupsURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/XY1vwCQskjX.json';
+var trackerBasedDataURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/VxWloRvAze8.json';
 var elementsPerPage = "20";
 var currentParam = "";
 var searchString = "";
@@ -121,20 +126,48 @@ function copyElement(original)
 
 app.controller("AddCtrl", function($scope) {
     $scope.input = {};
-    $scope.domainTypes = ['Aggregate', 'Tracker']
-    $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name']
-    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage']
-    $scope.textTypes = ['Text', 'Long text'],
-    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', '']
+
+    /* Options used by the selects */
+    $scope.domainTypes = ['Aggregate', 'Tracker'];
+    $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name'];
+    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage'];
+    $scope.textTypes = ['Text', 'Long text'];
+    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 's'];
+    $scope.storeZeros = ['No', 'Yes'];
+    
+    /* TODO get these options from jsons*/
+    $scope.catCombs = getOptionsJSON(categoryCombosURL).categoryCombos;
+    // optSets and optSetComs are the same set!
+    $scope.optSets = getOptionsJSON(optionSetURL).optionSets;
+    $scope.legendSets = getOptionsJSON(legendSetURL).mapLegendSets;
+    $scope.mainDataGroups = getOptionsJSON(mainDataElementGroupsURL).dataElementGroups;
+    $scope.trackerBasedDatas = getOptionsJSON(trackerBasedDataURL).dataElementGroups;
+
+    /* Initial value of the selects */
+    $scope.input.domainType = $scope.domainTypes[0];
+    $scope.input.valueType = $scope.valueTypes[0];
+    $scope.input.numberType =  $scope.numberTypes[0];
+    $scope.input.textType =  $scope.textTypes[0];
+    $scope.input.aggregateOperator = $scope.aggregateOpers[0];
+    $scope.input.storeZero = $scope.storeZeros[0];
+    $scope.input.aggregationLevels = false;
+    
+    // Assuming the possition of the 'defult' can change over time.
+    for (var i = 0; i < $scope.catCombs.length; i++){
+        if ($scope.catCombs[i].name === 'default') {
+            $scope.input.catComb = $scope.catCombs[i];
+            break;
+        }
+    }
 
     $scope.saveData = function() {   
         console.log("adding new element!");
-    }
+    };
 
     $scope.close = function() {
         $scope.input = {}; // Empty on cancel 
         console.log("test!");
-    }
+    };
 
     $scope.add = function() {
         // TODO Input validation, careate JASON and post
@@ -152,7 +185,7 @@ app.controller("AddCtrl", function($scope) {
         //saveNewElement(angular.toJson(generateValidJson($scope.input)));
 
         //$scope.input = {};
-    }
+    };
 
 });
 
@@ -217,6 +250,34 @@ function generateValidJson(input)
     output.zeroIsSignificant = false;
 
     return output;
+}
+
+
+function getOptionsJSON(jsonURL)
+{
+    elementsPerPage = 1000; //TODO set this dynamically
+ 
+    var out;
+
+    $.ajax({
+        type:"GET",
+        beforeSend: function (request)
+        {
+            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+        },
+        url: jsonURL + '?pageSize=' + elementsPerPage,
+        async: false,
+        success: function(data)
+        {
+            out = data;
+        },
+        error: function()
+        {
+            console.log("Error in getting options!");
+        }
+    });
+
+    return out;
 }
 
 
@@ -429,7 +490,7 @@ function queryAPI(pageNr)
         {
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
-        url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
+        url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr,
         success: function(data)
         {
             var scope = angular.element($("#mainContent")).scope();
