@@ -175,7 +175,14 @@ app.controller("AddCtrl", function($scope) {
         $scope.input.aggregationLevel = false;
         $scope.input.aggregationLevels = [];
         $scope.input.catComb = catCombDefault;
-
+        $scope.input.shortName = null;
+        $scope.input.optSet = null;
+        $scope.input.optSetCom = null;
+        $scope.input.legendSet = null;
+        $scope.input.dataGroup = null;
+        $scope.input.trackerData = null;
+        $scope.input.rationale = null;
+        $scope.input.unitOfMeasure = null;
     };
 
     $scope.setStartValues();
@@ -262,6 +269,7 @@ function generateValidJson(input)
     else return null;
     if (input.shortName !== null) output.shortName = input.shortName;
     else output.shortName = input.name;
+    console.log(output.shortName);
     if (input.code !== null) output.code = input.code;
     if (input.description !== null) output.description = input.description;
     if (input.formName !== null) output.formName = input.formName;
@@ -306,14 +314,14 @@ function generateValidJson(input)
     console.log(6);
     if (input.valueType !== null){
         if (input.valueType === "Number" || input.valueType === "Yes/No"){
-            if (input.valueType === "Sum") output.aggregationOperator = "sum";
-            if (input.valueType === "Average") output.aggregationOperator = "average";
-            if (input.valueType === "Count") output.aggregationOperator = "count";
-            if (input.valueType === "Standard deviation") output.aggregationOperator = "stddev";
-            if (input.valueType === "Variance") output.aggregationOperator = "variance";
-            if (input.valueType === "Min") output.aggregationOperator = "min";
-            if (input.valueType === "Max") output.aggregationOperator = "max";
-        }
+            if (input.aggregateOperator === "Sum") output.aggregationOperator = "sum";
+            if (input.aggregateOperator === "Average") output.aggregationOperator = "average";
+            if (input.aggregateOperator === "Count") output.aggregationOperator = "count";
+            if (input.aggregateOperator === "Standard deviation") output.aggregationOperator = "stddev";
+            if (input.aggregateOperator === "Variance") output.aggregationOperator = "variance";
+            if (input.aggregateOperator === "Min") output.aggregationOperator = "min";
+            if (input.aggregateOperator === "Max") output.aggregationOperator = "max";
+        } else output.aggregationOperator = "sum";
     } else return null;
     console.log(7);
 
