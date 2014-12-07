@@ -3,11 +3,14 @@ var corsProxy = 'http://www.corsproxy.com/'; //For testing
 //var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
-var optionSetURL = corsProxy + 'inf5750-12.uio.no/api/optionSets.json';
-var legendSetURL = corsProxy + 'inf5750-12.uio.no/api/mapLegendSets.json';
-var categoryCombosURL = corsProxy + 'inf5750-12.uio.no/api/categoryCombos.json';
-var mainDataElementGroupsURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/XY1vwCQskjX.json';
-var trackerBasedDataURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/VxWloRvAze8.json';
+
+// "Cahing" the options jsons globaly as they are used by multilpe controllers.
+var optionSet = null;
+var legendSet = null;
+var categoryCombos = null;
+var mainDataElementGroups = null;
+var trackerBasedData = null;
+
 var elementsPerPage = "20";
 var currentParam = "";
 var searchString = "";
@@ -132,41 +135,43 @@ app.controller("AddCtrl", function($scope) {
     $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name'];
     $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage'];
     $scope.textTypes = ['Text', 'Long text'];
-    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 's'];
+    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 'Variance', 'Min', 'Max'];
     $scope.storeZeros = ['No', 'Yes'];
-    
-    /* TODO get these options from jsons*/
-    $scope.catCombs = getOptionsJSON(categoryCombosURL).categoryCombos;
+   
     // optSets and optSetComs are the same set!
-    $scope.optSets = getOptionsJSON(optionSetURL).optionSets;
-    $scope.legendSets = getOptionsJSON(legendSetURL).mapLegendSets;
-    $scope.mainDataGroups = getOptionsJSON(mainDataElementGroupsURL).dataElementGroups;
-    $scope.trackerBasedDatas = getOptionsJSON(trackerBasedDataURL).dataElementGroups;
+    getOptions();
+    $scope.optSets = optionSet;
+    $scope.legendSets = legendSet;
+    $scope.catCombs = categoryCombos;
+    $scope.mainDataGroups = mainDataElementGroups;
+    $scope.trackerBasedDatas = trackerBasedData;
 
     /* Initial value of the selects */
-    $scope.input.domainType = $scope.domainTypes[0];
-    $scope.input.valueType = $scope.valueTypes[0];
-    $scope.input.numberType =  $scope.numberTypes[0];
-    $scope.input.textType =  $scope.textTypes[0];
-    $scope.input.aggregateOperator = $scope.aggregateOpers[0];
-    $scope.input.storeZero = $scope.storeZeros[0];
-    $scope.input.aggregationLevels = false;
+    $scope.setStartValues = function ()
+    {
+        $scope.input.domainType = $scope.domainTypes[0];
+        $scope.input.valueType = $scope.valueTypes[0];
+        $scope.input.numberType =  $scope.numberTypes[0];
+        $scope.input.textType =  $scope.textTypes[0];
+        $scope.input.aggregateOperator = $scope.aggregateOpers[0];
+        $scope.input.storeZero = $scope.storeZeros[0];
+        $scope.input.aggregationLevels = false;
     
-    // Assuming the possition of the 'defult' can change over time.
-    for (var i = 0; i < $scope.catCombs.length; i++){
-        if ($scope.catCombs[i].name === 'default') {
-            $scope.input.catComb = $scope.catCombs[i];
-            break;
+        // Assuming the possition of the 'defult' can change over time.
+        for (var i = 0; i < $scope.catCombs.length; i++)
+        {
+            if ($scope.catCombs[i].name === 'default') {
+                $scope.input.catComb = $scope.catCombs[i];
+                break;
+            }
         }
-    }
-
-    $scope.saveData = function() {   
-        console.log("adding new element!");
     };
 
+    $scope.setStartValues();
+
     $scope.close = function() {
-        $scope.input = {}; // Empty on cancel 
-        console.log("test!");
+        $scope.input = {}; // Empty on cancel
+        $scope.setStartValues();
     };
 
     $scope.add = function() {
@@ -177,6 +182,8 @@ app.controller("AddCtrl", function($scope) {
         if ($scope.aForm.$valid) {
             $('.modal').modal('hide');
             displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");
+            $scope.input = {};
+            $scope.setStartValues();
         } else {
             alert("There are invalid fields!");
         }
@@ -252,6 +259,29 @@ function generateValidJson(input)
     return output;
 }
 
+
+/**
+ * Sets the global options JSONs.
+ * 
+ * Will only download the json once.
+ * It would be better to use a cachingFactory
+ */
+function getOptions() {
+    var optionSetURL = corsProxy + 'inf5750-12.uio.no/api/optionSets.json';
+    var legendSetURL = corsProxy + 'inf5750-12.uio.no/api/mapLegendSets.json';
+    var categoryCombosURL = corsProxy + 'inf5750-12.uio.no/api/categoryCombos.json';
+    var mainDataElementGroupsURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/XY1vwCQskjX.json';
+    var trackerBasedDataURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/VxWloRvAze8.json';
+
+    // Only load the jsons the first time.
+    if (optionSet === null){ optionSet = getOptionsJSON(optionSetURL).optionSets;}
+    if (legendSet === null){ legendSet = getOptionsJSON(legendSetURL).mapLegendSets;}
+    if (categoryCombos === null){ categoryCombos = getOptionsJSON(categoryCombosURL).categoryCombos;}
+    if (mainDataElementGroups === null){ mainDataElementGroups = getOptionsJSON(mainDataElementGroupsURL).dataElementGroups;}
+    if (trackerBasedData === null){ trackerBasedData = getOptionsJSON(trackerBasedDataURL).dataElementGroups;}
+}
+
+
 /**
  * Gets the JSON objects used to get options.
  *
@@ -259,9 +289,9 @@ function generateValidJson(input)
  * increse some when using corsProxy. Hopefully the
  * load time is lower when it's runned on DHIS2.
  *
- * The elementsPerPage = 1000 is a quickHack. 
+ * The elementsPerPage = 1000 is a quick hack. 
  * One could run into jsons lager then 1000..
- * But as the data is used in creating dropdown menues
+ * but as the data is used in creating dropdown menues
  * such lage jsons are impractical.
  *
  * @param jsonURL
@@ -269,8 +299,7 @@ function generateValidJson(input)
  */
 function getOptionsJSON(jsonURL)
 {
-    elementsPerPage = 1000; //TODO set this dynamically
- 
+    var elementsPerPage = 1000; //TODO set this dynamically
     var out;
 
     $.ajax({
