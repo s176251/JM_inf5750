@@ -8,6 +8,7 @@ var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
 var optionSet = null;
 var legendSet = null;
 var categoryCombos = null;
+var catCombDefault = null;
 var mainDataElementGroups = null;
 var trackerBasedData = null;
 
@@ -129,15 +130,31 @@ function copyElement(original)
 
 app.controller("AddCtrl", function($scope) {
     $scope.input = {};
-
     /* Options used by the selects */
     $scope.domainTypes = ['Aggregate', 'Tracker'];
     $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name'];
-    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Integer', 'Percentage'];
+    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Inteval', 'Percentage'];
     $scope.textTypes = ['Text', 'Long text'];
     $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 'Variance', 'Min', 'Max'];
     $scope.storeZeros = ['No', 'Yes'];
-   
+    $scope.aggregationLevels = [];
+    one = {};
+    one.id = 1;
+    one.name = "National";
+    two = {};
+    two.id = 2;
+    two.name = "District";
+    three = {}; 
+    three.id = 3;
+    three.name = "Chiefdom";
+    four = {};
+    four.id = 4;
+    four.name = "Facility";
+    $scope.aggregationLevels.push(one); 
+    $scope.aggregationLevels.push(two); 
+    $scope.aggregationLevels.push(three); 
+    $scope.aggregationLevels.push(four); 
+
     // optSets and optSetComs are the same set!
     getOptions();
     $scope.optSets = optionSet;
@@ -155,16 +172,10 @@ app.controller("AddCtrl", function($scope) {
         $scope.input.textType =  $scope.textTypes[0];
         $scope.input.aggregateOperator = $scope.aggregateOpers[0];
         $scope.input.storeZero = $scope.storeZeros[0];
-        $scope.input.aggregationLevels = false;
-    
-        // Assuming the possition of the 'defult' can change over time.
-        for (var i = 0; i < $scope.catCombs.length; i++)
-        {
-            if ($scope.catCombs[i].name === 'default') {
-                $scope.input.catComb = $scope.catCombs[i];
-                break;
-            }
-        }
+        $scope.input.aggregationLevel = false;
+        $scope.input.aggregationLevels = [];
+        $scope.input.catComb = catCombDefault;
+
     };
 
     $scope.setStartValues();
@@ -175,13 +186,23 @@ app.controller("AddCtrl", function($scope) {
     };
 
     $scope.add = function() {
-        // TODO Input validation, careate JASON and post
         console.log("DEBUG add");
 
         $scope.showErrorsCheckValidity = true;
         if ($scope.aForm.$valid) {
             $('.modal').modal('hide');
             displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");
+            a = generateValidJson($scope.input);
+            console.log(a);
+            successCallback = function() {
+                displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");            
+            };
+
+            failCallback = function() {
+                displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
+            };
+
+            saveNewElement(a, successCallback, failCallback);
             $scope.input = {};
             $scope.setStartValues();
         } else {
@@ -236,27 +257,119 @@ function generateValidJson(input)
 {
     var output = {};
 
+    console.log(1);
     if (input.name !== null) output.name = input.name;
-    
+    else return null;
     if (input.shortName !== null) output.shortName = input.shortName;
     else output.shortName = input.name;
+    if (input.code !== null) output.code = input.code;
+    if (input.description !== null) output.description = input.description;
+    if (input.formName !== null) output.formName = input.formName;
+    console.log(2);
+    if (input.domainType !== null) {
+        if (input.domainType === "Aggregate") output.domainType = "AGGREGATE";
+        if (input.domainType === "Tracker") output.domainType = "TRACKER";
+    } else return null;
+   
+    console.log(3);
+    if (input.valueType !== null) {
+        if (input.valueType === 'Number') output.type = "int";
+        else if (input.valueType === 'Text') output.type =  "string";
+        else if (input.valueType === 'Yes/No') output.type = "bool";
+        else if (input.valueType === 'Yes only') output.type = "trueOnly"; 
+        else if (input.valueType === 'Date') output.type =  "date";
+        else if (input.valueType === 'User Name') output.type = "username";
+        else return null;
+    } else return null;
+    // Set the number/text type fields.
+    if (output.type === "int"){
+        console.log(4);
+        if (input.numberType !== null){
+            if (input.numberType === "Number") output.numberType = "number";
+            else if (input.numberType === "Integer") output.numberType = "int";
+            else if (input.numberType === "Positive Integer") output.numberType = "posInt";
+            else if (input.numberType === "Negative Integer") output.numberType = "negInt";
+            else if (input.numberType === "Positive or Zero Integer") output.numberType = "zeroPositiveInt";
+            else if (input.numberType === "Unit Inteval'") output.numberType = "unitInterval";
+            else if (input.numberType === "Percentage") output.numberType = "percentage";
+            else return null;
+        } else return null;
+    } else if (output.type === "string"){
+        console.log(5);
+        if (input.textType !== null){
+            if (input.textType === "Text") output.textType = "text";
+            else if (input.textType === "Long text") output.textType = "longText";
+            else return null
+        } else return null; 
+    }
 
-    // Faking the rest for now.
-    output.aggregationLevels = []; 
-    output.aggregationOperator = "sum";
-    output.attributeValues = [];
-    output.dataElementGroups = []; 
+    console.log(6);
+    if (input.valueType !== null){
+        if (input.valueType === "Number" || input.valueType === "Yes/No"){
+            if (input.valueType === "Sum") output.aggregationOperator = "sum";
+            if (input.valueType === "Average") output.aggregationOperator = "average";
+            if (input.valueType === "Count") output.aggregationOperator = "count";
+            if (input.valueType === "Standard deviation") output.aggregationOperator = "stddev";
+            if (input.valueType === "Variance") output.aggregationOperator = "variance";
+            if (input.valueType === "Min") output.aggregationOperator = "min";
+            if (input.valueType === "Max") output.aggregationOperator = "max";
+        }
+    } else return null;
+    console.log(7);
+
+    if (output.type === "int"){
+        if (input.storeZero !== null && input.storeZero !== "Yes") output.zeroIsSignificant = true;   
+        else output.zeroIsSignificant = false;   
+    } else {
+        output.zeroIsSignificant = false;   
+    }
+    if (input.url !== null) output.url = input.url;
+    if (output.domainType === "AGGREGATE"){
+        if (input.catComb !== null) {
+            output.categoryCombo = input.catComb;
+        } else output.categoryCombo = catCombDefault;
+    } else output.categoryCombo = catCombDefault;
+    
+    if (input.optSet !== null) output.optionSet = input.optSet;
+    if (input.optSetCom !== null) output.commentOptionSet = input.optSetCom;
+    if (input.legendSet !== null) output.legendSet = input.legendSet;
+
+    //TODO
+
+    if (input.aggregationLevel) output.aggregationLevel = input.aggregationLevels;
+    else output.aggregationLevel = []; 
+    
+    if (input.rationale !== null || input.unitOfMeasure !== null){
+        output.attributeValues = [];
+        if (input.rationale !== null) {
+            rat = {};
+            rat.value = input.rationale;
+            rat.attribute = {};
+            rat.attribute.id = "AhsCAtM3L0g";
+            rat.attribute.name = "Rationale";
+            rat.attribute.created = "2011-12-24T11:24:22.575+0000";
+            rat.attribute.lastUpdated = "2011-12-24T11:24:22.575+0000";
+            output.attributeValues.push(rat);
+        }
+        if (input.unitOfMeasure !== null){
+            rat = {};
+            rat.value = input.unitOfMeasure;
+            rat.attribute = {};
+            rat.attribute.id = "Y1LUDU8sWBR";
+            rat.attribute.name = "Unit of measure";
+            rat.attribute.created = "2011-12-24T11:24:22.575+0000";
+            rat.attribute.lastUpdated = "2011-12-24T11:24:22.575+0000";
+            output.attributeValues.push(rat);
+        }
+    }
+    output.dataElementGroups = [];
+    if (input.dataGroup !== null) output.dataElementGroups.push(input.dataGroup);
+    if (input.trackerData !== null) output.dataElementGroups.push(input.trackerData);
     output.dataSets = [];
-    output.domainType = "AGGREGATE";
     output.externalAccess = false;
     output.items = [];
-    output.numberType = "number";
-    output.type = "int";
-    output.url = "www.google.com";
-    output.userGroupAccesses = [];
-    output.zeroIsSignificant = false;
-
-    return output;
+    
+    return angular.toJson(output);
 }
 
 
@@ -279,6 +392,15 @@ function getOptions() {
     if (categoryCombos === null){ categoryCombos = getOptionsJSON(categoryCombosURL).categoryCombos;}
     if (mainDataElementGroups === null){ mainDataElementGroups = getOptionsJSON(mainDataElementGroupsURL).dataElementGroups;}
     if (trackerBasedData === null){ trackerBasedData = getOptionsJSON(trackerBasedDataURL).dataElementGroups;}
+   
+    // Assuming the possition of the 'defult' can change over time.
+    for (var i = 0; i < categoryCombos.length; i++)
+    {
+        if (categoryCombos[i].name === 'default') {
+            catCombDefault = categoryCombos[i];
+            break;
+        }
+    }
 }
 
 
