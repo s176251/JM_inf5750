@@ -142,7 +142,9 @@ app.controller("PostsCtrl", function($scope, $http)
         console.log("edit init!");
     };
 
-    $scope.clear = function() {
+    $scope.clear = function(event, id, element){
+        console.log("bl")
+        $scope.showDataElement(event, id, element);
         $scope.input = {};
         $scope.interpretElement();
     };
