@@ -249,8 +249,13 @@ app.controller("PostsCtrl", function($scope, $http)
         }
 
         $scope.input.aggregationLevels = $scope.element.aggregationLevels;
-        if ($scope.input.aggregationLevels !== null && $scope.input.aggregationLevels.lenght > 0) $scope.input.aggregationLevel = true;
-        else $scope.input.aggregationLevel = false;
+        if ($scope.element.aggregationLevels !== null && $scope.element.aggregationLevels !== undefined){
+            if ($scope.input.aggregationLevels.lenght === 0) $scope.input.aggregationLevel = false;
+            else $scope.input.aggregationLevel = true;
+        } else $scope.input.aggregationLevel = false;
+        
+        console.log($scope.input.aggregationLevel);
+        console.log($scope.input.aggregationLevels);
 
         if ($scope.element.attributeValues !== null && $scope.element.attributeValues !== undefined){
             for (i = 0; i < $scope.element.attributeValues.length; i++){
