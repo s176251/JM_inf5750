@@ -1,6 +1,6 @@
 var app = angular.module("MyApp", []);
-var corsProxy = 'http://www.corsproxy.com/'; //For testing
-//var corsProxy = 'http://'; //For deployment
+//var corsProxy = 'http://www.corsproxy.com/'; //For testing
+var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
 
@@ -11,6 +11,14 @@ var categoryCombos = null;
 var catCombDefault = null;
 var mainDataElementGroups = null;
 var trackerBasedData = null;
+
+var domainTypes = ['Aggregate', 'Tracker'];
+var valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name'];
+var numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Inteval', 'Percentage'];
+var textTypes = ['Text', 'Long text'];
+var aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 'Variance', 'Min', 'Max'];
+var storeZeros = ['No', 'Yes'];
+var aggregationLevels = createAggLevels();
 
 var elementsPerPage = "20";
 var currentParam = "";
@@ -72,6 +80,7 @@ app.controller("PostsCtrl", function($scope, $http)
             $parent = $("[id='" + id + "']");
             $nextElem = $parent.next();
             $nextElem.slideToggle(animationSpeed);
+            console.log("test");
         }
     }
 
@@ -128,16 +137,210 @@ function copyElement(original)
 }
 
 
-app.controller("AddCtrl", function($scope) {
-    $scope.input = {};
-    /* Options used by the selects */
-    $scope.domainTypes = ['Aggregate', 'Tracker'];
-    $scope.valueTypes = ['Number', 'Text', 'Yes/No', 'Yes only', 'Date', 'User name'];
-    $scope.numberTypes = ['Number', 'Integer', 'Positive Integer', 'Negative Integer', 'Positive or Zero Integer', 'Unit Inteval', 'Percentage'];
-    $scope.textTypes = ['Text', 'Long text'];
-    $scope.aggregateOpers = ['Sum', 'Average', 'Count', 'Standard deviation', 'Variance', 'Min', 'Max'];
-    $scope.storeZeros = ['No', 'Yes'];
-    $scope.aggregationLevels = [];
+app.controller("EditCtrl", function($scope) {
+
+    $scope.domainTypes = domainTypes;
+    $scope.valueTypes = valueTypes;
+    $scope.numberTypes = numberTypes;
+    $scope.textTypes = textTypes;
+    $scope.aggregateOpers = aggregateOpers;
+    $scope.storeZeros = storeZeros;
+    $scope.aggregationLevels = aggregationLevels;
+
+    // optSets and optSetComs are the same set!
+    getOptions();
+    $scope.optSets = optionSet;
+    $scope.legendSets = legendSet;
+    $scope.catCombs = categoryCombos;
+    $scope.mainDataGroups = mainDataElementGroups;
+    $scope.trackerBasedDatas = trackerBasedData;
+    
+    $scope.input = {};
+
+    $scope.init = function (post){
+        $scope.post = post;
+        $scope.interpretPost();
+        console.log("edit init!");
+    };
+
+    $scope.clear = function() {
+        $scope.input = {};
+        $scope.interpretPost();
+    };
+
+    $scope.save = function() {
+        successCallback = function() {
+            displayNotifyModal(TypeEnum.SUCCESS, "Element saved!");
+            $scope.clear;
+            queryAPI(1);
+        };
+        failCallback = function() {
+            displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
+        };
+        updateElement($scope.input, $scope.post.id, successCallback, failCallback);
+        // colapse the edit
+        // reload the api
+    };
+
+    $scope.interpretPost = function(){
+        $scope.input.name = $scope.post.name;
+        $scope.input.shortName = $scope.post.shortName;
+        $scope.input.code = $scope.post.code;
+        $scope.input.description = $scope.post.description;
+        $scope.input.formName = $scope.post.formName;
+
+        if ($scope.post.domainType === "AGGREGATE") $scope.input.domainType = $scope.domainTypes[0];
+        else if ($scope.post.domainType === "TRACKER") $scope.input.domainType = $scope.domainTypes[1];
+
+        if ($scope.post.type !== null){
+            if ($scope.post.type === "int") $scope.input.valueType = $scope.valueTypes[0];
+            else if ($scope.post.type === "string") $scope.input.valueType = $scope.valueTypes[1];
+            else if ($scope.post.type === "bool") $scope.input.valueType = $scope.valueTypes[2];
+            else if ($scope.post.type === "trueOnly") $scope.input.valueType = $scope.valueTypes[3];
+            else if ($scope.post.type === "date") $scope.input.valueType = $scope.valueTypes[4];
+            else if ($scope.post.type === "username") $scope.input.valueType = $scope.valueTypes[5];
+        }
+
+        if ($scope.post.numberType !== null){
+            if ($scope.post.numberType === "number") $scope.input.numberType = $scope.numberTypes[0];
+            else if ($scope.post.numberType === "int") $scope.input.numberType = $scope.numberTypes[1];
+            else if ($scope.post.numberType === "posInt") $scope.input.numberType = $scope.numberTypes[2];
+            else if ($scope.post.numberType === "negInt") $scope.input.numberType = $scope.numberTypes[3];
+            else if ($scope.post.numberType === "zeroPositiveInt") $scope.input.numberType = $scope.numberTypes[4];
+            else if ($scope.post.numberType === "unitInterval") $scope.input.numberType = $scope.numberTypes[5];
+            else if ($scope.post.numberType === "percentage") $scope.input.numberType = $scope.numberType[6];
+        }
+
+        if ($scope.post.textType !== null){
+            if ($scope.post.textType === "text") $scope.input.textType = $scope.textTypes[0];
+            else if ($scope.post.textType === "longText") $scope.input.textType = $scope.textTypes[0]; 
+        }
+
+        if ($scope.post.aggregationOperator !== null){
+            if ($scope.post.aggregationOperator === "sum") $scope.input.aggregateOperator = $scope.aggregateOpers[0];
+            else if ($scope.post.aggregationOperator === "average") $scope.input.aggregateOperator = $scope.aggregateOpers[1];
+            else if ($scope.post.aggregationOperator === "count") $scope.input.aggregateOperator = $scope.aggregateOpers[2];
+            else if ($scope.post.aggregationOperator === "stddev") $scope.input.aggregateOperator = $scope.aggregateOpers[3];
+            else if ($scope.post.aggregationOperator === "variance") $scope.input.aggregateOperator = $scope.aggregateOpers[4];
+            else if ($scope.post.aggregationOperator === "min") $scope.input.aggregateOperator = $scope.aggregateOpers[5];
+            else if ($scope.post.aggregationOperator === "max") $scope.input.aggregateOperator = $scope.aggregateOpers[6];
+        }
+        if ($scope.post.zeroIsSignificant) $scope.input.storeZero = storeZeros[1];
+        else $scope.input.storeZero =storeZeros[0];
+    
+        if ($scope.post.url !== null && $scope.post.url !== undefined) $scope.input.url = $scope.post.url;
+        
+        if ($scope.post.categoryCombo !== null && $scope.post.categoryCombo !== undefined) {
+            for (i = 0; i < $scope.catCombs.length; i++) {
+                if ($scope.post.categoryCombo.name === $scope.catCombs[i].name) {
+                    $scope.input.catComb = $scope.catCombs[i];
+                    break;
+                }
+            }
+        } 
+        if ($scope.input.catComb !== null && $scope.input.catComb !== undefined) {
+            $scope.input.catComb = catCombDefault; 
+        }
+        
+        if ($scope.post.optionSet !== null && $scope.post.optionSet !== undefined) {
+            for (i = 0; i < $scope.optSets.length; i++) {
+                if ($scope.post.optionSet.name === $scope.optSets[i].name){
+                    $scope.input.optSet = $scope.optSets[i];
+                    break;
+                }
+            }
+        }
+
+        if ($scope.post.commentOptionSet !== null && $scope.post.commentOptionSet !== undefined) {
+            for (i = 0; i < $scope.optSets.length; i++) {
+                if ($scope.post.commentOptionSet.name === $scope.optSets[i].name){
+                    $scope.input.optSetCom = $scope.optSets[i];
+                    break;
+                }
+            }
+        }
+        
+        if ($scope.post.legendSet !== null && $scope.post.legendSet !== undefined) {
+            for (i = 0; i < $scope.legendSets.length; i++) {
+                if ($scope.post.legendSet.name === $scope.legendSets[i].name){
+                    $scope.input.legendSet = $scope.legendSets[i];
+                    break;
+                }
+            }
+        }
+
+        $scope.input.aggregationLevels = $scope.post.aggregationLevels;
+        if ($scope.input.aggregationLevels !== null && $scope.input.aggregationLevels.lenght > 0) $scope.input.aggregationLevel = true;
+        else $scope.input.aggregationLevel = false;
+
+        if ($scope.post.attributeValues !== null && $scope.post.attributeValues !== undefined){
+            for (i = 0; i < $scope.post.attributeValues.length; i++){
+                if ($scope.post.attributeValues[i].attribute.name === "Unit of measure") {
+                    $scope.input.unifOfMeasure = $scope.post.attributeValues[i].value;
+                } else if ($scope.post.attributeValues[i].attribute.name === "Rationale") {
+                    $scope.input.rationale = $scope.post.attributeValues[i].value;
+                }
+            }
+        }
+
+        if ($scope.post.dataElementGroups !== null && $scope.post.dataElementGroups !== undefined) {
+            for (i = 0; i < $scope.post.dataElementGroups; i++){
+                for (j = 0; j < $scope.mainDataGroups.length; j++) {
+                    if ($scope.post.dataElementGroups[i].name === $scope.mainDataGroups[j].name){
+                        $scope.input.dataGroup = $scope.mainDataElementGroups[j];
+                        break;
+                    }
+                }
+                for (j = 0; j < $scope.trackerBasedData; j++){
+                    if ($scope.post.dataElementGroups[i].name === $scope.trackerBasedData[j].name){
+                        $scope.input.trackerData = $scope.trackerBasedData[j];
+                        break;
+                    }
+                }
+            }
+        }
+    };
+});
+
+/**
+ * Takes input from the edit page and
+ * posts its as a json the server.
+ */
+function updateElement(input, id, successCallback, errorCallback) {
+    //var postURL = baseURL + "/" + id;
+    var postURL = baseURL;
+    var payload = generateValidJson(input);
+    
+    // Cant get the server to accept the update json.
+    // The apachelog complains about nullpointers..
+    // Deleting the old one and saving as new works fine...
+    deleteElement(id);
+
+    $("body").css("cursor", "progress"); //Sets busy cursor while querying API 
+    $.ajax({
+        type:"POST",
+        beforeSend: function (request)
+        {
+            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+        },
+        url: postURL,
+        data: payload,
+        contentType: "application/json", //; charset=utf-8
+        success: function(data)
+        {
+            $("body").css("cursor", "default"); //Restore cursor when done
+            if(successCallback) successCallback();
+        },          
+        error: function(data, status)
+        {
+            $("body").css("cursor", "default"); //Restore cursor when done
+            if(errorCallback) errorCallback();
+        }
+    });
+}
+
+function createAggLevels(){
+    out = []
     one = {};
     one.id = 1;
     one.name = "National";
@@ -150,10 +353,26 @@ app.controller("AddCtrl", function($scope) {
     four = {};
     four.id = 4;
     four.name = "Facility";
-    $scope.aggregationLevels.push(one); 
-    $scope.aggregationLevels.push(two); 
-    $scope.aggregationLevels.push(three); 
-    $scope.aggregationLevels.push(four); 
+    out.push(one); 
+    out.push(two); 
+    out.push(three); 
+    out.push(four); 
+    return out;
+}   
+
+/**
+ * The controller for the "Add new data element" modal
+ */
+app.controller("AddCtrl", function($scope) {
+    $scope.input = {};
+    /* Options used by the selects */
+    $scope.domainTypes = domainTypes; 
+    $scope.valueTypes = valueTypes;
+    $scope.numberTypes = numberTypes;
+    $scope.textTypes = textTypes;
+    $scope.aggregateOpers = aggregateOpers;
+    $scope.storeZeros = storeZeros;
+    $scope.aggregationLevels = aggregationLevels;
 
     // optSets and optSetComs are the same set!
     getOptions();
@@ -203,6 +422,7 @@ app.controller("AddCtrl", function($scope) {
             console.log(a);
             successCallback = function() {
                 displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");            
+                queryAPI(1);
             };
 
             failCallback = function() {
@@ -215,13 +435,7 @@ app.controller("AddCtrl", function($scope) {
         } else {
             alert("There are invalid fields!");
         }
-
-        //saveNewElement(angular.toJson($scope.element));       
-        //saveNewElement(angular.toJson(generateValidJson($scope.input)));
-
-        //$scope.input = {};
     };
-
 });
 
 /**
@@ -265,22 +479,22 @@ function generateValidJson(input)
     var output = {};
 
     console.log(1);
-    if (input.name !== null) output.name = input.name;
+    if (input.name !== null && input.name !== undefined) output.name = input.name;
     else return null;
-    if (input.shortName !== null) output.shortName = input.shortName;
+    if (input.shortName !== null && input.shortName !== undefined) output.shortName = input.shortName;
     else output.shortName = input.name;
     console.log(output.shortName);
-    if (input.code !== null) output.code = input.code;
-    if (input.description !== null) output.description = input.description;
-    if (input.formName !== null) output.formName = input.formName;
+    if (input.code !== null && input.code !== undefined) output.code = input.code;
+    if (input.description !== null && input.description !== undefined) output.description = input.description;
+    if (input.formName !== null && input.formName !== undefined) output.formName = input.formName;
     console.log(2);
-    if (input.domainType !== null) {
+    if (input.domainType !== null && input.domainType !== undefined) {
         if (input.domainType === "Aggregate") output.domainType = "AGGREGATE";
         if (input.domainType === "Tracker") output.domainType = "TRACKER";
     } else return null;
    
     console.log(3);
-    if (input.valueType !== null) {
+    if (input.valueType !== null && input.valueType !== undefined) {
         if (input.valueType === 'Number') output.type = "int";
         else if (input.valueType === 'Text') output.type =  "string";
         else if (input.valueType === 'Yes/No') output.type = "bool";
@@ -292,7 +506,7 @@ function generateValidJson(input)
     // Set the number/text type fields.
     if (output.type === "int"){
         console.log(4);
-        if (input.numberType !== null){
+        if (input.numberType !== null && input.numberType !== undefined){
             if (input.numberType === "Number") output.numberType = "number";
             else if (input.numberType === "Integer") output.numberType = "int";
             else if (input.numberType === "Positive Integer") output.numberType = "posInt";
@@ -304,7 +518,7 @@ function generateValidJson(input)
         } else return null;
     } else if (output.type === "string"){
         console.log(5);
-        if (input.textType !== null){
+        if (input.textType !== null && input.textType !== undefined){
             if (input.textType === "Text") output.textType = "text";
             else if (input.textType === "Long text") output.textType = "longText";
             else return null
@@ -312,44 +526,48 @@ function generateValidJson(input)
     }
 
     console.log(6);
-    if (input.valueType !== null){
+    if (input.valueType !== null && input.valueType !== undefined){
         if (input.valueType === "Number" || input.valueType === "Yes/No"){
             if (input.aggregateOperator === "Sum") output.aggregationOperator = "sum";
-            if (input.aggregateOperator === "Average") output.aggregationOperator = "average";
-            if (input.aggregateOperator === "Count") output.aggregationOperator = "count";
-            if (input.aggregateOperator === "Standard deviation") output.aggregationOperator = "stddev";
-            if (input.aggregateOperator === "Variance") output.aggregationOperator = "variance";
-            if (input.aggregateOperator === "Min") output.aggregationOperator = "min";
-            if (input.aggregateOperator === "Max") output.aggregationOperator = "max";
+            else if (input.aggregateOperator === "Average") output.aggregationOperator = "average";
+            else if (input.aggregateOperator === "Count") output.aggregationOperator = "count";
+            else if (input.aggregateOperator === "Standard deviation") output.aggregationOperator = "stddev";
+            else if (input.aggregateOperator === "Variance") output.aggregationOperator = "variance";
+            else if (input.aggregateOperator === "Min") output.aggregationOperator = "min";
+            else if (input.aggregateOperator === "Max") output.aggregationOperator = "max";
+            else output.aggregationOperator = "sum";
         } else output.aggregationOperator = "sum";
     } else return null;
     console.log(7);
 
     if (output.type === "int"){
-        if (input.storeZero !== null && input.storeZero !== "Yes") output.zeroIsSignificant = true;   
+        if (input.storeZero !== null && input.storeZero !== undefined && input.storeZero !== "Yes") output.zeroIsSignificant = true;   
         else output.zeroIsSignificant = false;   
     } else {
         output.zeroIsSignificant = false;   
     }
-    if (input.url !== null) output.url = input.url;
+    if (input.url !== null&& input.url !== undefined) output.url = input.url;
     if (output.domainType === "AGGREGATE"){
-        if (input.catComb !== null) {
+        if (input.catComb !== null && input.catComb !== undefined) {
             output.categoryCombo = input.catComb;
         } else output.categoryCombo = catCombDefault;
     } else output.categoryCombo = catCombDefault;
     
-    if (input.optSet !== null) output.optionSet = input.optSet;
-    if (input.optSetCom !== null) output.commentOptionSet = input.optSetCom;
-    if (input.legendSet !== null) output.legendSet = input.legendSet;
+    if (input.optSet !== null && input.optSet !== undefined) output.optionSet = input.optSet;
+    if (input.optSetCom !== null && input.optSetCom !== undefined) output.commentOptionSet = input.optSetCom;
+    if (input.legendSet !== null && input.legendSet !== undefined) output.legendSet = input.legendSet;
 
     //TODO
 
-    if (input.aggregationLevel) output.aggregationLevel = input.aggregationLevels;
+    output.aggregationLevel = input.aggregationLevel;
+    
+
+    if (input.aggregationLevel) output.aggregationLevels = input.aggregationLevels;
     else output.aggregationLevel = []; 
     
-    if (input.rationale !== null || input.unitOfMeasure !== null){
+    if ((input.rationale !== null && input.rational !== undefined) || (input.unitOfMeasure !== null && input.unitOfMeasure !== undefined)){
         output.attributeValues = [];
-        if (input.rationale !== null) {
+        if (input.rationale !== null && input.rationale !== undefined) {
             rat = {};
             rat.value = input.rationale;
             rat.attribute = {};
@@ -359,7 +577,7 @@ function generateValidJson(input)
             rat.attribute.lastUpdated = "2011-12-24T11:24:22.575+0000";
             output.attributeValues.push(rat);
         }
-        if (input.unitOfMeasure !== null){
+        if (input.unitOfMeasure !== null && input.unitOfMeasure !== undefined){
             rat = {};
             rat.value = input.unitOfMeasure;
             rat.attribute = {};
@@ -370,13 +588,18 @@ function generateValidJson(input)
             output.attributeValues.push(rat);
         }
     }
+
+    // Possible bug in DHIS2?
+    // The system does add the dataElementGroup when creating a new element.
+    // The old editor has the same behavior.
+    // The dataElementGroups are adde in an update of the system.
     output.dataElementGroups = [];
-    if (input.dataGroup !== null) output.dataElementGroups.push(input.dataGroup);
-    if (input.trackerData !== null) output.dataElementGroups.push(input.trackerData);
+    if (input.dataGroup !== null && input.dataGroup !== undefined) output.dataElementGroups.push(input.dataGroup);
+    if (input.trackerData !== null && input.dataGroup !== undefined) output.dataElementGroups.push(input.trackerData);
+
     output.dataSets = [];
     output.externalAccess = false;
     output.items = [];
-    
     return angular.toJson(output);
 }
 

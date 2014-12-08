@@ -21,9 +21,6 @@
 <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addNew" id="addNewButton">Add new</button>
 
 <div id="mainContent" ng-controller="PostsCtrl">
-
-<!--
--->
     <div id="successDiv">
         <div class="alert alert-success">
             <a href="#" class="close" data-dismiss="alert">&times;</a>
@@ -41,129 +38,213 @@
     <div class="listContainer">
         <div class="panel panel-info" id="lst-dataEle">
             <div class="panel-heading" ng-init="totalNrOfElements='()'">
-                                                                <table class="infoGroup">
-                                                                    <tr>
-                                                                        <td class="nameInfo"><span>Data Elements {{totalNrOfElements}}</span></td>
-                                                                        <td class="createdInfo"><span>Created by</span></td>
-                                                                        <td class="updatedInfo"><span id="sortModified" ng-click="sortAllByModified()">Last modified<span class="caret"></span></span></td>
-                                                                        <td class="actionsInfo"></td>
-                                                                    </tr>
-                                                                </table>
+                <table class="infoGroup">
+                    <tr>
+                        <td class="nameInfo"><span>Data Elements {{totalNrOfElements}}</span></td>
+                        <td class="createdInfo"><span>Created by</span></td>
+                        <td class="updatedInfo"><span id="sortModified" ng-click="sortAllByModified()">Last modified<span class="caret"></span></span></td>
+                        <td class="actionsInfo"></td>
+                    </tr>
+                </table>
             </div>
         </div>
         <div class="list-group" ng-repeat="post in posts.dataElements">
             <!-- <a href="{{post.href}}" class="list-group-item">{{post.name}}</a> -->
             <div class="panel panel-default">
                 <div class="panel-heading"  ng-click="showDataElement($event, post.id)" id="{{post.id}}">
-                                                                <table class="infoGroup">
-                                                                    <tr>
-                                                                        <td class="nameInfo"><span>{{post.name}}</span></td>
-                                                                        <td class="createdInfo"><span ng-if="post.user.name != null">{{post.user.name}}</span></td>
-                                                                        <td class="updatedInfo"><span>{{post.lastUpdated | toReadableDate}}</span></td>
-                                                                        <td  class="actionsInfo">
-                                                                            <span id="{{post.id}}del" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
-                                                                            <img id="{{post.id}}dup" src="img/icons/copy_blue.png" title="Duplicate" class="duplicateButton" ng-click="duplicateElement(post)" \>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
+                    <table class="infoGroup">
+                        <tr>
+                            <td class="nameInfo"><span>{{post.name}}</span></td>
+                            <td class="createdInfo"><span ng-if="post.user.name != null">{{post.user.name}}</span></td>
+                            <td class="updatedInfo"><span>{{post.lastUpdated | toReadableDate}}</span></td>
+                            <td  class="actionsInfo">
+                                <span id="{{post.id}}del" class="glyphicon glyphicon-remove" title="Delete" 
+                                    aria-hidden="true" ng-click="delElement(post.id, post.name)"></span>
+                                <img id="{{post.id}}dup" src="img/icons/copy_blue.png" title="Duplicate" 
+                                    class="duplicateButton" ng-click="duplicateElement(post)" \>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="panel-body">
-                    <div class="input-group">
-                        <span class="input-group-addon">Name</span>
-                        <input type="text" class="form-control" value="{{post.name}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Short name:</span>
-                        <input type="text" class="form-control" value="{{post.shortName}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Code:</span>
-                        <input type="text" class="form-control" value="{{post.code}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Description:</span>
-                        <textarea rows="4" cols="50" class="form-control">{{post.description}}</textarea>
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Form name:</span>
-                        <input type="text" class="form-control" value="{{post.formName}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Domain type:</span>
-                        <div class="btn-group">
-                            <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">{{post.domainType | capitalize}}<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a>Aggregate</a></li>
-                                <li><a>Tracker</a></li>
-                            </ul>
+                    <div ng-controller="EditCtrl" ng-init="init(post)"> 
+                        <form class="form-horizontal" role="form" name="aForm" novalidate> 
+                            <div class="form-group required" show-errors>
+                                <label for="postName" class="col-sm-2 control-label">Name</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="name" id="postName" ng-model="input.name" required>
+                                    <p class="help-block" ng-if="aForm.name.$error.required">A data element name is required!</p>
+                                </div>
+                            </div>
+                        <!--OK - Short Name(java.lang.String)-->
+                        <div class="form-group" show-errors>  
+                            <label for="postShortName" class="col-sm-2 control-label">Short name</label>  
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="shortName" id="postShortName" ng-model="input.shortName">
+                            </div>
                         </div>
-                    </div>
+                        
+                        <!--OK - Code(java.lang.String)-->
+                        <div class="form-group" show-errors>
+                            <label for="postCode" class="col-sm-2 control-label">Code</label>
+                            <div class="col-sm-10">
+                                <input type="textField" class="form-control" name="code" id="postCode" ng-model="input.code">  
+                            </div>
+                        </div>
 
-                    <div class="input-group">
-                        <span class="input-group-addon">Value type</span>
-                        <input type="text" class="form-control" value="{{post.type}}">
-                    </div>
+                        <!--OK - Description(java.lang.String)-->
+                        <div class="form-group" show-errors>
+                            <label for="postDescription" class="col-sm-2 control-label">Description</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" rows="3" name="description" id="postDescription" ng-model="input.description"></textarea>
+                            </div>
+                        </div>
 
-                    <div class="input-group">
-                        <span class="input-group-addon">Number type:</span>
-                        <input type="text" class="form-control" value="{{post.numberType}}">
-                    </div>
+                        <!--OK - Form name(java.lang.String)-->
+                        <div class="form-group" show-errors>
+                            <label for="postFormName" class="col-sm-2 control-label">Form name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="formName" id="postFormName" ng-model="input.formName">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group required" show-errors>
+                            <label for="postDomainType" class="col-sm-2 control-label">Domain Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="domainType" id="postDomainType" 
+                                    ng-model="input.domainType" ng-options="o for o in domainTypes" required></select>
+                                <p class="help-block" ng-if="aForm.domainType.$error.required">You need to chose a Domain type!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group required" show-errors>
+                            <label for="postValueType" class="col-sm-2 control-label">Value Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="valueType" id="postValueType" ng-model="input.valueType" 
+                                    ng-options="o for o in valueTypes" required></select>
+                                <p class="help-block" ng-if="aForm.valueType.$error.required">You need to chose a Value type!</p>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="input.valueType === 'Number'" show-errors>
+                            <label for="postNumberType" class="col-sm-2 control-label">Number Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="numberType" id="postNumberType" 
+                                    ng-model="input.numberType" ng-options="o for o in numberTypes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="input.valueType === 'Text'" show-errors>
+                            <label for="postTextType" class="col-sm-2 control-label">Text Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="textType" id="postTextType"
+                                    ng-model="input.textType" ng-options="o for o in textTypes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group required" show-errors>
+                            <label for="postAggregateOperator" class="col-sm-2 control-label">Aggregate Operator</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="aggregateOperations" id="postAggreagteOperator" 
+                                    ng-disabled="input.valueType !== 'Number' && input.valueType !== 'Yes/No'"
+                                    ng-model="input.aggregateOperator" ng-options="o for o in aggregateOpers" 
+                                    ng-required="input.valueType !== 'Text'"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postStoreZeroDataValues" class="col-sm-2 control-label">Store Zero Data Values</label>
+                            <div class="col-sm-10" >
+                                <select ng-disabled="input.valueType !== 'Number' || input.aggregateOperator !== 'Sum'" name="storeZeroDataValues"
+                                    class="form-control" id="postStoreZeroDataValues" ng-model="input.storeZero" 
+                                    ng-options="o for o in storeZeros"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postUrl" class="col-sm-2 control-label">Url</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="postUrl" ng-model="input.url">
+                            </div>
+                        </div>
+                        <div class="form-group required" show-errors>
+                            <label for="postCatComb" class="col-sm-2 control-label">Category Combination</label>
+                            <div class="col-sm-10" >
+                                <select name="catComb" class="form-control" id="postCatComb" ng-model="input.catComb" 
+                                    ng-disabled="input.domainType !== 'Aggregate'" ng-options="o as o.name for o in catCombs" required></select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postOptSet" class="col-sm-2 control-label">Option set for data values</label>
+                            <div class="col-sm-10" >
+                                <select name="optSet" class="form-control" id="postOptSet" ng-model="input.optSet" 
+                                    ng-options="o as o.name for o in optSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postOptSetCom" class="col-sm-2 control-label">Option set for comments</label>
+                            <div class="col-sm-10" >
+                                <select name="optSetCom" class="form-control" id="postOptSetCom" ng-model="input.optSetCom" 
+                                    ng-options="o as o.name for o in optSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postLegendSet" class="col-sm-2 control-label">Legend set</label>
+                            <div class="col-sm-10" >
+                                <select name="legendSet" class="form-control" id="postLegendSet" ng-model="input.legendSet" 
+                                    ng-options="o as o.name for o in legendSets">
+                                    <option value="">[Please select]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postAggLevel" class="col-sm-2 control-label">Aggregation levels</label>
+                            <div class="col-sm-10">
+                                <input type="checkbox" ng-model="input.aggregationLevel"> 
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors ng-show="input.aggregationLevel === true">
+                            <p class="help-block" ng-show="input.aggregationLevel === true">Hold the ctrl-key to select multiple values</p>
+                            <label for="inputAggLevels" class="col-sm-2 control-label">Selet aggregation levels</label>
+                            <div class="col-sm-10">
+                                <select multiple="multiple" ng-model="input.aggregationLevels" ng-options="o.id as o.name for o in aggregationLevels"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postRationale" class="col-sm-2 control-label">Rationale</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="postRationale" ng-model="input.rationale">
+                            </div>
+                        </div>
+                        <div class="form-group" show-error>
+                            <label for="postUnitOfMeasure" class="col-sm-2 control-label">Unit of Measure</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="postUnitOfMeasure" ng-model="input.unitOfMeasure">
+                            </div>
+                        </div>
 
-                    <div class="input-group">
-                        <span class="input-group-addon">Aggregation Operator:</span>
-                        <input type="text" class="form-control" value="{{post.aggregationOperator}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Store zero values:</span>
-                        <input type="text" class="form-control" value="{{post.zeroIsSignificant}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">URL</span>
-                        <input type="text" class="form-control" value="{{post.url}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Category combination:</span>
-                        <input type="text" class="form-control" value="{{post.categoryCombo.name}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Option set for data values:</span>
-                        <input type="text" class="form-control" value="{{post.optionSet.name}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Option set for comments:</span>
-                        <input type="text" class="form-control" value="{{post.commentOptionSet.name}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Legend set</span>
-                        <input type="text" class="form-control" value="{{post.legendSet.name}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Aggregation Levels</span>
-                        <input type="text" class="form-control" value="{{post.aggregationLevels}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Rationale</span>
-                        <input type="text" class="form-control" value="{{post.attributeValues[1].value}}">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-addon">Unit of measure</span>
-                        <input type="text" class="form-control" value="{{post.attributeValues[0].value}}">
-                    </div>
-
+                        <h4 id="dEG">Data Element Groupps</h4>
+                        <hr>
+                        <div class="form-group" show-errors>
+                            <label for="postDataGroup" class="col-sm-2 control-label">Main data element groups</label>
+                            <div class="col-sm-10" >
+                                <select name="dataGroup" class="form-control" id="postDataGroup" ng-model="input.dataGroup" 
+                                    ng-options="o as o.name for o in mainDataGroups">
+                                    <option value="">[Select group]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" show-errors>
+                            <label for="postTrackerData" class="col-sm-2 control-label">Tracker-based data</label>
+                            <div class="col-sm-10" >
+                                <select name="trackerData" class="form-control" id="postTrackerData" ng-model="input.trackerData" 
+                                    ng-options="o as o.name for o in trackerBasedDatas">
+                                    <option value="">[Select group]</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="clear()">Cancel</button>
+                    <button class="btn btn-success" type="submit" ng-click="save()">Save</button>
                 </div>
             </div>
         </div>
@@ -240,7 +321,7 @@
                             <div class="col-sm-10">
                                 <select class="form-control" name="domainType" id="inputDomainType" 
                                     ng-model="input.domainType" ng-options="o for o in domainTypes" required></select>
-                                <p class="help-block" ng-if="aForm.domainType.$error.required">You ned to chose a Domain type!</p>
+                                <p class="help-block" ng-if="aForm.domainType.$error.required">You need to chose a Domain type!</p>
                             </div>
                         </div>
 
@@ -250,7 +331,7 @@
                             <div class="col-sm-10">
                                 <select class="form-control" name="valueType" id="input" ng-model="input.valueType" 
                                     ng-options="o for o in valueTypes" required></select>
-                                <p class="help-block" ng-if="aForm.valueType.$error.required">You ned to chose a Value type!</p>
+                                <p class="help-block" ng-if="aForm.valueType.$error.required">You need to chose a Value type!</p>
                             </div>
                         </div>
                         
