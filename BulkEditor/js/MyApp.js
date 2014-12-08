@@ -1,6 +1,6 @@
 var app = angular.module("MyApp", []);
-//var corsProxy = 'http://www.corsproxy.com/'; //For testing
-var corsProxy = 'http://'; //For deployment
+var corsProxy = 'http://www.corsproxy.com/'; //For testing
+//var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
 
@@ -70,9 +70,10 @@ app.controller("PostsCtrl", function($scope, $http)
             alert(status);
         });
 
-    $scope.showDataElement = function(event, id)
+    $scope.showDataElement = function(event, id, element)
     {
         loadListeners();
+        $scope.init(element);
         var el = event.target;
 
         if(el.id !== id + "del" && el.id !== id + "dup")
@@ -113,6 +114,168 @@ app.controller("PostsCtrl", function($scope, $http)
         currentParam = parseSearchString("&query=");
         queryAPI(-2);
     }
+
+    $scope.domainTypes = domainTypes;
+    $scope.valueTypes = valueTypes;
+    $scope.numberTypes = numberTypes;
+    $scope.textTypes = textTypes;
+    $scope.aggregateOpers = aggregateOpers;
+    $scope.storeZeros = storeZeros;
+    $scope.aggregationLevels = aggregationLevels;
+
+    // optSets and optSetComs are the same set!
+    getOptions();
+    $scope.optSets = optionSet;
+    $scope.legendSets = legendSet;
+    $scope.catCombs = categoryCombos;
+    $scope.mainDataGroups = mainDataElementGroups;
+    $scope.trackerBasedDatas = trackerBasedData;
+    
+    $scope.input = {};
+
+    $scope.init = function (element){
+        $scope.element = element;
+        $scope.interpretElement();
+        console.log("edit init!");
+    };
+
+    $scope.clear = function() {
+        $scope.input = {};
+        $scope.interpretElement();
+    };
+
+    $scope.save = function() {
+        successCallback = function() {
+            displayNotifyModal(TypeEnum.SUCCESS, "Element saved!");
+            $scope.clear;
+            queryAPI(1);
+        };
+        failCallback = function() {
+            displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
+        };
+        updateElement($scope.input, $scope.element.id, successCallback, failCallback);
+        // colapse the edit
+        // reload the api
+    };
+
+    $scope.interpretElement = function(){
+        $scope.input.name = $scope.element.name;
+        $scope.input.shortName = $scope.element.shortName;
+        $scope.input.code = $scope.element.code;
+        $scope.input.description = $scope.element.description;
+        $scope.input.formName = $scope.element.formName;
+
+        if ($scope.element.domainType === "AGGREGATE") $scope.input.domainType = $scope.domainTypes[0];
+        else if ($scope.element.domainType === "TRACKER") $scope.input.domainType = $scope.domainTypes[1];
+
+        if ($scope.element.type !== null){
+            if ($scope.element.type === "int") $scope.input.valueType = $scope.valueTypes[0];
+            else if ($scope.element.type === "string") $scope.input.valueType = $scope.valueTypes[1];
+            else if ($scope.element.type === "bool") $scope.input.valueType = $scope.valueTypes[2];
+            else if ($scope.element.type === "trueOnly") $scope.input.valueType = $scope.valueTypes[3];
+            else if ($scope.element.type === "date") $scope.input.valueType = $scope.valueTypes[4];
+            else if ($scope.element.type === "username") $scope.input.valueType = $scope.valueTypes[5];
+        }
+
+        if ($scope.element.numberType !== null){
+            if ($scope.element.numberType === "number") $scope.input.numberType = $scope.numberTypes[0];
+            else if ($scope.element.numberType === "int") $scope.input.numberType = $scope.numberTypes[1];
+            else if ($scope.element.numberType === "posInt") $scope.input.numberType = $scope.numberTypes[2];
+            else if ($scope.element.numberType === "negInt") $scope.input.numberType = $scope.numberTypes[3];
+            else if ($scope.element.numberType === "zeroPositiveInt") $scope.input.numberType = $scope.numberTypes[4];
+            else if ($scope.element.numberType === "unitInterval") $scope.input.numberType = $scope.numberTypes[5];
+            else if ($scope.element.numberType === "percentage") $scope.input.numberType = $scope.numberType[6];
+        }
+
+        if ($scope.element.textType !== null){
+            if ($scope.element.textType === "text") $scope.input.textType = $scope.textTypes[0];
+            else if ($scope.element.textType === "longText") $scope.input.textType = $scope.textTypes[0]; 
+        }
+
+        if ($scope.element.aggregationOperator !== null){
+            if ($scope.element.aggregationOperator === "sum") $scope.input.aggregateOperator = $scope.aggregateOpers[0];
+            else if ($scope.element.aggregationOperator === "average") $scope.input.aggregateOperator = $scope.aggregateOpers[1];
+            else if ($scope.element.aggregationOperator === "count") $scope.input.aggregateOperator = $scope.aggregateOpers[2];
+            else if ($scope.element.aggregationOperator === "stddev") $scope.input.aggregateOperator = $scope.aggregateOpers[3];
+            else if ($scope.element.aggregationOperator === "variance") $scope.input.aggregateOperator = $scope.aggregateOpers[4];
+            else if ($scope.element.aggregationOperator === "min") $scope.input.aggregateOperator = $scope.aggregateOpers[5];
+            else if ($scope.element.aggregationOperator === "max") $scope.input.aggregateOperator = $scope.aggregateOpers[6];
+        }
+        if ($scope.element.zeroIsSignificant) $scope.input.storeZero = storeZeros[1];
+        else $scope.input.storeZero =storeZeros[0];
+    
+        if ($scope.element.url !== null && $scope.element.url !== undefined) $scope.input.url = $scope.element.url;
+        
+        if ($scope.element.categoryCombo !== null && $scope.element.categoryCombo !== undefined) {
+            for (i = 0; i < $scope.catCombs.length; i++) {
+                if ($scope.element.categoryCombo.name === $scope.catCombs[i].name) {
+                    $scope.input.catComb = $scope.catCombs[i];
+                    break;
+                }
+            }
+        } 
+        if ($scope.element.catComb !== null && $scope.element.catComb !== undefined) {
+            $scope.input.catComb = catCombDefault; 
+        }
+        
+        if ($scope.element.optionSet !== null && $scope.element.optionSet !== undefined) {
+            for (i = 0; i < $scope.optSets.length; i++) {
+                if ($scope.element.optionSet.name === $scope.optSets[i].name){
+                    $scope.input.optSet = $scope.optSets[i];
+                    break;
+                }
+            }
+        }
+
+        if ($scope.element.commentOptionSet !== null && $scope.element.commentOptionSet !== undefined) {
+            for (i = 0; i < $scope.optSets.length; i++) {
+                if ($scope.element.commentOptionSet.name === $scope.optSets[i].name){
+                    $scope.input.optSetCom = $scope.optSets[i];
+                    break;
+                }
+            }
+        }
+        
+        if ($scope.element.legendSet !== null && $scope.element.legendSet !== undefined) {
+            for (i = 0; i < $scope.legendSets.length; i++) {
+                if ($scope.element.legendSet.name === $scope.legendSets[i].name){
+                    $scope.input.legendSet = $scope.legendSets[i];
+                    break;
+                }
+            }
+        }
+
+        $scope.input.aggregationLevels = $scope.element.aggregationLevels;
+        if ($scope.input.aggregationLevels !== null && $scope.input.aggregationLevels.lenght > 0) $scope.input.aggregationLevel = true;
+        else $scope.input.aggregationLevel = false;
+
+        if ($scope.element.attributeValues !== null && $scope.element.attributeValues !== undefined){
+            for (i = 0; i < $scope.element.attributeValues.length; i++){
+                if ($scope.element.attributeValues[i].attribute.name === "Unit of measure") {
+                    $scope.input.unifOfMeasure = $scope.element.attributeValues[i].value;
+                } else if ($scope.element.attributeValues[i].attribute.name === "Rationale") {
+                    $scope.input.rationale = $scope.element.attributeValues[i].value;
+                }
+            }
+        }
+
+        if ($scope.element.dataElementGroups !== null && $scope.element.dataElementGroups !== undefined) {
+            for (i = 0; i < $scope.element.dataElementGroups; i++){
+                for (j = 0; j < $scope.mainDataGroups.length; j++) {
+                    if ($scope.element.dataElementGroups[i].name === $scope.mainDataGroups[j].name){
+                        $scope.input.dataGroup = $scope.mainDataElementGroups[j];
+                        break;
+                    }
+                }
+                for (j = 0; j < $scope.trackerBasedData; j++){
+                    if ($scope.element.dataElementGroups[i].name === $scope.trackerBasedData[j].name){
+                        $scope.input.trackerData = $scope.trackerBasedData[j];
+                        break;
+                    }
+                }
+            }
+        }
+    };
 });
 
 function copyElement(original)
@@ -136,171 +299,6 @@ function copyElement(original)
     return newElement;
 }
 
-
-app.controller("EditCtrl", function($scope) {
-
-    $scope.domainTypes = domainTypes;
-    $scope.valueTypes = valueTypes;
-    $scope.numberTypes = numberTypes;
-    $scope.textTypes = textTypes;
-    $scope.aggregateOpers = aggregateOpers;
-    $scope.storeZeros = storeZeros;
-    $scope.aggregationLevels = aggregationLevels;
-
-    // optSets and optSetComs are the same set!
-    getOptions();
-    $scope.optSets = optionSet;
-    $scope.legendSets = legendSet;
-    $scope.catCombs = categoryCombos;
-    $scope.mainDataGroups = mainDataElementGroups;
-    $scope.trackerBasedDatas = trackerBasedData;
-    
-    $scope.input = {};
-
-    $scope.init = function (post){
-        $scope.post = post;
-        $scope.interpretPost();
-        console.log("edit init!");
-    };
-
-    $scope.clear = function() {
-        $scope.input = {};
-        $scope.interpretPost();
-    };
-
-    $scope.save = function() {
-        successCallback = function() {
-            displayNotifyModal(TypeEnum.SUCCESS, "Element saved!");
-            $scope.clear;
-            queryAPI(1);
-        };
-        failCallback = function() {
-            displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
-        };
-        updateElement($scope.input, $scope.post.id, successCallback, failCallback);
-        // colapse the edit
-        // reload the api
-    };
-
-    $scope.interpretPost = function(){
-        $scope.input.name = $scope.post.name;
-        $scope.input.shortName = $scope.post.shortName;
-        $scope.input.code = $scope.post.code;
-        $scope.input.description = $scope.post.description;
-        $scope.input.formName = $scope.post.formName;
-
-        if ($scope.post.domainType === "AGGREGATE") $scope.input.domainType = $scope.domainTypes[0];
-        else if ($scope.post.domainType === "TRACKER") $scope.input.domainType = $scope.domainTypes[1];
-
-        if ($scope.post.type !== null){
-            if ($scope.post.type === "int") $scope.input.valueType = $scope.valueTypes[0];
-            else if ($scope.post.type === "string") $scope.input.valueType = $scope.valueTypes[1];
-            else if ($scope.post.type === "bool") $scope.input.valueType = $scope.valueTypes[2];
-            else if ($scope.post.type === "trueOnly") $scope.input.valueType = $scope.valueTypes[3];
-            else if ($scope.post.type === "date") $scope.input.valueType = $scope.valueTypes[4];
-            else if ($scope.post.type === "username") $scope.input.valueType = $scope.valueTypes[5];
-        }
-
-        if ($scope.post.numberType !== null){
-            if ($scope.post.numberType === "number") $scope.input.numberType = $scope.numberTypes[0];
-            else if ($scope.post.numberType === "int") $scope.input.numberType = $scope.numberTypes[1];
-            else if ($scope.post.numberType === "posInt") $scope.input.numberType = $scope.numberTypes[2];
-            else if ($scope.post.numberType === "negInt") $scope.input.numberType = $scope.numberTypes[3];
-            else if ($scope.post.numberType === "zeroPositiveInt") $scope.input.numberType = $scope.numberTypes[4];
-            else if ($scope.post.numberType === "unitInterval") $scope.input.numberType = $scope.numberTypes[5];
-            else if ($scope.post.numberType === "percentage") $scope.input.numberType = $scope.numberType[6];
-        }
-
-        if ($scope.post.textType !== null){
-            if ($scope.post.textType === "text") $scope.input.textType = $scope.textTypes[0];
-            else if ($scope.post.textType === "longText") $scope.input.textType = $scope.textTypes[0]; 
-        }
-
-        if ($scope.post.aggregationOperator !== null){
-            if ($scope.post.aggregationOperator === "sum") $scope.input.aggregateOperator = $scope.aggregateOpers[0];
-            else if ($scope.post.aggregationOperator === "average") $scope.input.aggregateOperator = $scope.aggregateOpers[1];
-            else if ($scope.post.aggregationOperator === "count") $scope.input.aggregateOperator = $scope.aggregateOpers[2];
-            else if ($scope.post.aggregationOperator === "stddev") $scope.input.aggregateOperator = $scope.aggregateOpers[3];
-            else if ($scope.post.aggregationOperator === "variance") $scope.input.aggregateOperator = $scope.aggregateOpers[4];
-            else if ($scope.post.aggregationOperator === "min") $scope.input.aggregateOperator = $scope.aggregateOpers[5];
-            else if ($scope.post.aggregationOperator === "max") $scope.input.aggregateOperator = $scope.aggregateOpers[6];
-        }
-        if ($scope.post.zeroIsSignificant) $scope.input.storeZero = storeZeros[1];
-        else $scope.input.storeZero =storeZeros[0];
-    
-        if ($scope.post.url !== null && $scope.post.url !== undefined) $scope.input.url = $scope.post.url;
-        
-        if ($scope.post.categoryCombo !== null && $scope.post.categoryCombo !== undefined) {
-            for (i = 0; i < $scope.catCombs.length; i++) {
-                if ($scope.post.categoryCombo.name === $scope.catCombs[i].name) {
-                    $scope.input.catComb = $scope.catCombs[i];
-                    break;
-                }
-            }
-        } 
-        if ($scope.input.catComb !== null && $scope.input.catComb !== undefined) {
-            $scope.input.catComb = catCombDefault; 
-        }
-        
-        if ($scope.post.optionSet !== null && $scope.post.optionSet !== undefined) {
-            for (i = 0; i < $scope.optSets.length; i++) {
-                if ($scope.post.optionSet.name === $scope.optSets[i].name){
-                    $scope.input.optSet = $scope.optSets[i];
-                    break;
-                }
-            }
-        }
-
-        if ($scope.post.commentOptionSet !== null && $scope.post.commentOptionSet !== undefined) {
-            for (i = 0; i < $scope.optSets.length; i++) {
-                if ($scope.post.commentOptionSet.name === $scope.optSets[i].name){
-                    $scope.input.optSetCom = $scope.optSets[i];
-                    break;
-                }
-            }
-        }
-        
-        if ($scope.post.legendSet !== null && $scope.post.legendSet !== undefined) {
-            for (i = 0; i < $scope.legendSets.length; i++) {
-                if ($scope.post.legendSet.name === $scope.legendSets[i].name){
-                    $scope.input.legendSet = $scope.legendSets[i];
-                    break;
-                }
-            }
-        }
-
-        $scope.input.aggregationLevels = $scope.post.aggregationLevels;
-        if ($scope.input.aggregationLevels !== null && $scope.input.aggregationLevels.lenght > 0) $scope.input.aggregationLevel = true;
-        else $scope.input.aggregationLevel = false;
-
-        if ($scope.post.attributeValues !== null && $scope.post.attributeValues !== undefined){
-            for (i = 0; i < $scope.post.attributeValues.length; i++){
-                if ($scope.post.attributeValues[i].attribute.name === "Unit of measure") {
-                    $scope.input.unifOfMeasure = $scope.post.attributeValues[i].value;
-                } else if ($scope.post.attributeValues[i].attribute.name === "Rationale") {
-                    $scope.input.rationale = $scope.post.attributeValues[i].value;
-                }
-            }
-        }
-
-        if ($scope.post.dataElementGroups !== null && $scope.post.dataElementGroups !== undefined) {
-            for (i = 0; i < $scope.post.dataElementGroups; i++){
-                for (j = 0; j < $scope.mainDataGroups.length; j++) {
-                    if ($scope.post.dataElementGroups[i].name === $scope.mainDataGroups[j].name){
-                        $scope.input.dataGroup = $scope.mainDataElementGroups[j];
-                        break;
-                    }
-                }
-                for (j = 0; j < $scope.trackerBasedData; j++){
-                    if ($scope.post.dataElementGroups[i].name === $scope.trackerBasedData[j].name){
-                        $scope.input.trackerData = $scope.trackerBasedData[j];
-                        break;
-                    }
-                }
-            }
-        }
-    };
-});
 
 /**
  * Takes input from the edit page and
