@@ -84,7 +84,6 @@ app.controller("PostsCtrl", function($scope, $http)
             $parent = $("[id='" + id + "']");
             $nextElem = $parent.next();
             $nextElem.slideToggle(animationSpeed);
-            console.log("test");
         }
     }
 
@@ -139,11 +138,9 @@ app.controller("PostsCtrl", function($scope, $http)
     $scope.init = function (element){
         $scope.element = element;
         $scope.interpretElement();
-        console.log("edit init!");
     };
 
     $scope.clear = function(event, id, element){
-        console.log("bl")
         $scope.showDataElement(event, id, element);
         $scope.input = {};
         $scope.interpretElement();
@@ -256,9 +253,6 @@ app.controller("PostsCtrl", function($scope, $http)
             else $scope.input.aggregationLevel = true;
         } else $scope.input.aggregationLevel = false;
         
-        console.log($scope.input.aggregationLevel);
-        console.log($scope.input.aggregationLevels);
-
         if ($scope.element.attributeValues !== null && $scope.element.attributeValues !== undefined){
             for (i = 0; i < $scope.element.attributeValues.length; i++){
                 if ($scope.element.attributeValues[i].attribute.name === "Unit of measure") {
@@ -414,8 +408,6 @@ app.controller("AddCtrl", function($scope) {
     };
 
     $scope.add = function() {
-        console.log("DEBUG add");
-
         $scope.showErrorsCheckValidity = true;
         if ($scope.aForm.$valid) {
             $('.modal').modal('hide');
