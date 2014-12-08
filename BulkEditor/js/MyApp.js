@@ -148,7 +148,7 @@ app.controller("PostsCtrl", function($scope, $http)
         successCallback = function() {
             displayNotifyModal(TypeEnum.SUCCESS, "Element saved!");
             $scope.clear;
-            //queryAPI(1);
+            queryAPI(1);
         };
         failCallback = function() {
             displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
@@ -305,18 +305,12 @@ function copyElement(original)
  * posts its as a json the server.
  */
 function updateElement(input, id, successCallback, errorCallback) {
-    //var postURL = baseURL + "/" + id;
-    var postURL = baseURL;
+    var postURL = baseURL + "/" + id + ".json";
     var payload = generateValidJson(input);
-    
-    // Cant get the server to accept the update json.
-    // The apachelog complains about nullpointers..
-    // Deleting the old one and saving as new works fine...
-    deleteElement(id);
-
+   
     $("body").css("cursor", "progress"); //Sets busy cursor while querying API 
     $.ajax({
-        type:"POST",
+        type:"PUT",
         beforeSend: function (request)
         {
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
@@ -415,9 +409,8 @@ app.controller("AddCtrl", function($scope) {
         $scope.showErrorsCheckValidity = true;
         if ($scope.aForm.$valid) {
             $('.modal').modal('hide');
-            displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");
             a = generateValidJson($scope.input);
-            console.log(a);
+            
             successCallback = function() {
                 displayNotifyModal(TypeEnum.SUCCESS, "New element saved!");            
                 queryAPI(1);
@@ -476,22 +469,18 @@ function generateValidJson(input)
 {
     var output = {};
 
-    console.log(1);
     if (input.name !== null && input.name !== undefined) output.name = input.name;
     else return null;
     if (input.shortName !== null && input.shortName !== undefined) output.shortName = input.shortName;
     else output.shortName = input.name;
-    console.log(output.shortName);
     if (input.code !== null && input.code !== undefined) output.code = input.code;
     if (input.description !== null && input.description !== undefined) output.description = input.description;
     if (input.formName !== null && input.formName !== undefined) output.formName = input.formName;
-    console.log(2);
     if (input.domainType !== null && input.domainType !== undefined) {
         if (input.domainType === "Aggregate") output.domainType = "AGGREGATE";
         if (input.domainType === "Tracker") output.domainType = "TRACKER";
     } else return null;
    
-    console.log(3);
     if (input.valueType !== null && input.valueType !== undefined) {
         if (input.valueType === 'Number') output.type = "int";
         else if (input.valueType === 'Text') output.type =  "string";
@@ -503,7 +492,6 @@ function generateValidJson(input)
     } else return null;
     // Set the number/text type fields.
     if (output.type === "int"){
-        console.log(4);
         if (input.numberType !== null && input.numberType !== undefined){
             if (input.numberType === "Number") output.numberType = "number";
             else if (input.numberType === "Integer") output.numberType = "int";
@@ -515,7 +503,6 @@ function generateValidJson(input)
             else return null;
         } else return null;
     } else if (output.type === "string"){
-        console.log(5);
         if (input.textType !== null && input.textType !== undefined){
             if (input.textType === "Text") output.textType = "text";
             else if (input.textType === "Long text") output.textType = "longText";
@@ -523,7 +510,6 @@ function generateValidJson(input)
         } else return null; 
     }
 
-    console.log(6);
     if (input.valueType !== null && input.valueType !== undefined){
         if (input.valueType === "Number" || input.valueType === "Yes/No"){
             if (input.aggregateOperator === "Sum") output.aggregationOperator = "sum";
@@ -536,7 +522,6 @@ function generateValidJson(input)
             else output.aggregationOperator = "sum";
         } else output.aggregationOperator = "sum";
     } else return null;
-    console.log(7);
 
     if (output.type === "int"){
         if (input.storeZero !== null && input.storeZero !== undefined && input.storeZero !== "Yes") output.zeroIsSignificant = true;   
