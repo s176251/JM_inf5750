@@ -148,7 +148,7 @@ app.controller("PostsCtrl", function($scope, $http)
         successCallback = function() {
             displayNotifyModal(TypeEnum.SUCCESS, "Element saved!");
             $scope.clear;
-            queryAPI(1);
+            //queryAPI(1);
         };
         failCallback = function() {
             displayNotifyModal(TypeEnum.ERROR, "ERROR in saving element to server!");
@@ -650,7 +650,7 @@ function getOptions() {
  */
 function getOptionsJSON(jsonURL)
 {
-    var elementsPerPage = 1000; //TODO set this dynamically
+    var pageElements = 1000; //TODO set this dynamically
     var out;
 
     $.ajax({
@@ -659,7 +659,7 @@ function getOptionsJSON(jsonURL)
         {
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
-        url: jsonURL + '?pageSize=' + elementsPerPage,
+        url: jsonURL + '?pageSize=' + pageElements,
         async: false,
         success: function(data)
         {
@@ -884,7 +884,7 @@ function queryAPI(pageNr)
         {
             request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
         },
-        url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr,
+        url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
         success: function(data)
         {
             var scope = angular.element($("#mainContent")).scope();
@@ -901,6 +901,7 @@ function queryAPI(pageNr)
                 {
                     sortResults(data.dataElements);
                     scope.posts = data;
+                    console.log(scope.posts);
                     scope.totalNrOfElements = "(" + data.dataElements.length + " total)";
                     document.getElementById('pageNavigator').innerHTML = "";
                 }
