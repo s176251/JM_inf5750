@@ -3,6 +3,7 @@ var corsProxy = 'http://www.corsproxy.com/'; //For testing
 //var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
+var dhisURL = corsProxy + 'inf5750-12.uio.no/api/';
 
 // "Cahing" the options jsons globaly as they are used by multilpe controllers.
 var optionSet = null;
@@ -54,6 +55,8 @@ app.filter('toReadableDate', function()
 
 app.controller("PostsCtrl", function($scope, $http)
 {
+    setBaseURL();
+
     $http.defaults.headers.common.Authorization = 'Basic YWRtaW46ZGlzdHJpY3Q=';
 
     $http.get(url + '&pageSize=' + elementsPerPage). //'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements?pageSize=10'
@@ -594,11 +597,11 @@ function generateValidJson(input)
  * It would be better to use a cachingFactory
  */
 function getOptions() {
-    var optionSetURL = corsProxy + 'inf5750-12.uio.no/api/optionSets.json';
-    var legendSetURL = corsProxy + 'inf5750-12.uio.no/api/mapLegendSets.json';
-    var categoryCombosURL = corsProxy + 'inf5750-12.uio.no/api/categoryCombos.json';
-    var mainDataElementGroupsURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/XY1vwCQskjX.json';
-    var trackerBasedDataURL = corsProxy + 'inf5750-12.uio.no/api/dataElementGroupSets/VxWloRvAze8.json';
+    var optionSetURL = dhisURL + 'optionSets.json';
+    var legendSetURL = dhisURL + 'mapLegendSets.json';
+    var categoryCombosURL = dhisURL + 'categoryCombos.json';
+    var mainDataElementGroupsURL = dhisURL + 'dataElementGroupSets/XY1vwCQskjX.json';
+    var trackerBasedDataURL = dhisURL + 'dataElementGroupSets/VxWloRvAze8.json';
 
     // Only load the jsons the first time.
     if (optionSet === null){ optionSet = getOptionsJSON(optionSetURL).optionSets;}
@@ -1040,26 +1043,18 @@ function makePageNav(pageInfo)
     document.getElementById('pageNavigator').innerHTML = leftArrow + numberHtml + rightArrow;
 }
 
-
-/*
-$(".panel-heading").click(function ()
+function setBaseURL()
 {
-    alert(" Yo ");
-    $header = $(this);
-    //getting the next element
-    $content = $header.next();
-    //open up the content needed - toggle the slide- if visible, slide up, if not slidedown.
-    $content.slideToggle(500);
-
-    //, function () {
-        //execute this after slideToggle is done
-        //change text of header based on visibility of content div
-     //   $header.text(function ()
-     //   {
-            //change text based on condition
-     //       return $content.is(":visible") ? "Collapse" : "Expand";
-     //   });
-    //});
-
-});
-*/
+    $.ajax({
+        url: "manifest.webapp",
+        dataType: 'json',
+        async: false,
+        success: function( json )
+        {
+            baseURL = json.activities.dhis.href + "/api/dataElements";
+            url = json.activities.dhis.href + "/api/dataElements.json?fields=*";
+            dhisURL = json.activities.dhis.href + "/api/";
+            console.log(json.activities.dhis.href + "/api/dataElements");
+        }
+    });
+}
