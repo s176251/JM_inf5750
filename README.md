@@ -16,7 +16,13 @@ Open Source (inf5750) project, Data Element Bulk Editor
 [DHIS2 Documentation](https://www.dhis2.org/doc/snapshot/en/developer/html/dhis2_developer_manual.html)
 
 
-TODO: 
+#### Members
+
+* Martin WL
+* Jonas M
+* Sivert H
+
+#### TODO: 
 For better performance everything in the "panel-body" (line 92 in index.html, which is repeated for every element) should be set/initiated when showDataElement() is called.
 This isn't a big issue when less than 30/40 elements is returned, but causes the page to freeze for up to a minute when > 400 elements is displayed.
 Unfortunately this fell outside the scope of our assignment, but should be the first priority for any further development.
