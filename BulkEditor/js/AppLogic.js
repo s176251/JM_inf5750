@@ -15,13 +15,12 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 var app = angular.module("MyApp", []);
 //var corsProxy = 'http://www.corsproxy.com/'; //For testing
-var corsProxy = 'http://'; //For deployment
-var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
-var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
-var dhisURL = corsProxy + 'inf5750-12.uio.no/api/';
+//var corsProxy = 'http://'; //For deployment
+var url;//  = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
+var baseURL; // = corsProxy + 'inf5750-12.uio.no/api/dataElements';
+var dhisURL; // = corsProxy + 'inf5750-12.uio.no/api/';
 
 // "Cahing" the options jsons globaly as they are used by multilpe controllers.
 var optionSet = null;
@@ -47,6 +46,7 @@ var animationSpeed = 250;
 var loaded = false;
 var descendingModifiedSort = false;
 var useSearchPaging = false;
+var authentication = 'Basic YWRtaW46ZGlzdHJpY3Q=';
 
 TypeEnum = {
     ERROR: "Error",
@@ -83,9 +83,9 @@ app.filter('toReadableDate', function()
  */
 app.controller("PostsCtrl", function($scope, $http)
 {
-    //setBaseURL();
+    setBaseURL();
 
-    $http.defaults.headers.common.Authorization = 'Basic YWRtaW46ZGlzdHJpY3Q=';
+    $http.defaults.headers.common.Authorization = authentication;
 
     $http.get(url + '&pageSize=' + elementsPerPage). //'http://www.corsproxy.com/inf5750-12.uio.no/api/dataElements?pageSize=10'
         success(function(data, status, headers, config)
@@ -353,7 +353,7 @@ function updateElement(input, id, successCallback, errorCallback) {
         type:"PUT",
         beforeSend: function (request)
         {
-            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+            request.setRequestHeader("Authorization", authentication);
         },
         url: postURL,
         data: payload,
@@ -396,6 +396,7 @@ function createAggLevels(){
  * The controller for the "Add new data element" modal
  */
 app.controller("AddCtrl", function($scope) {
+
     $scope.input = {};
     /* Options used by the selects */
     $scope.domainTypes = domainTypes; 
@@ -680,7 +681,7 @@ function getOptionsJSON(jsonURL)
         type:"GET",
         beforeSend: function (request)
         {
-            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+            request.setRequestHeader("Authorization", authentication);
         },
         url: jsonURL + '?pageSize=' + pageElements,
         async: false,
@@ -712,7 +713,7 @@ function saveNewElement(newElement, successCallback, errorCallback)
         type:"POST",
         beforeSend: function (request)
         {
-            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+            request.setRequestHeader("Authorization", authentication);
         },
         url: baseURL,
         data: newElement,
@@ -745,7 +746,7 @@ function deleteElement(id)
         type:"DELETE",
         beforeSend: function (request)
         {
-            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+            request.setRequestHeader("Authorization", authentication);
         },
         url: baseURL + "/" + id,
         success: function(data, status)
@@ -906,7 +907,7 @@ function queryAPI(pageNr)
         type:"GET",
         beforeSend: function (request)
         {
-            request.setRequestHeader("Authorization", 'Basic YWRtaW46ZGlzdHJpY3Q=');
+            request.setRequestHeader("Authorization", authentication);
         },
         url: url + '&pageSize=' + elementsPerPage + '&page=' + pageNr + currentParam,
         success: function(data)
@@ -1095,7 +1096,6 @@ function setBaseURL()
             baseURL = json.activities.dhis.href + "/api/dataElements";
             url = json.activities.dhis.href + "/api/dataElements.json?fields=*";
             dhisURL = json.activities.dhis.href + "/api/";
-            console.log(json.activities.dhis.href + "/api/dataElements");
         }
     });
 }
