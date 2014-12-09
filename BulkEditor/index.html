@@ -84,6 +84,11 @@
                         </tr>
                     </table>
                 </div>
+                <!--
+                    TODO: For better performance everything in the panel-body (which is repeated for every element) should be set/initiated when showDataElement() is called.
+                    TODO: This isn't a big issue when less than 30/40 elements is returned, but causes the page to freeze for up to a minute when > 400 elements is displayed.
+                    TODO: Unfortunately this fell outside the scope of our assignment, but should be the first priority for any further development.
+                 -->
                 <div class="panel-body">
                     <form class="form-horizontal" role="form" name="aForm" novalidate> 
                         <div class="form-group required" show-errors>

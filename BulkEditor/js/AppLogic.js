@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 var app = angular.module("MyApp", []);
-//var corsProxy = 'http://www.corsproxy.com/'; //For testing
-//var corsProxy = 'http://'; //For deployment
+//var corsProxy = 'http://www.corsproxy.com/'; //For testing   var corsProxy = 'http://'; //For deployment
+// The following three vars are set in setBaseURL() which should be called before any DHIS2-API calls.
 var url;//  = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL; // = corsProxy + 'inf5750-12.uio.no/api/dataElements';
 var dhisURL; // = corsProxy + 'inf5750-12.uio.no/api/';
@@ -46,7 +46,7 @@ var animationSpeed = 250;
 var loaded = false;
 var descendingModifiedSort = false;
 var useSearchPaging = false;
-var authentication = 'Basic YWRtaW46ZGlzdHJpY3Q=';
+var authentication = 'Basic ' + btoa("admin:district");  // YWRtaW46ZGlzdHJpY3Q= //Base 64 encode username & pwd (req. IE10++)
 
 TypeEnum = {
     ERROR: "Error",
