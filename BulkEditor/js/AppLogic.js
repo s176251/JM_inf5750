@@ -1,6 +1,24 @@
+/*
+ DataBulk editor for DHIS2
+ Copyright (C) 2014  DHIS2
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 var app = angular.module("MyApp", []);
-var corsProxy = 'http://www.corsproxy.com/'; //For testing
-//var corsProxy = 'http://'; //For deployment
+//var corsProxy = 'http://www.corsproxy.com/'; //For testing
+var corsProxy = 'http://'; //For deployment
 var url = corsProxy + 'inf5750-12.uio.no/api/dataElements.json?fields=*';
 var baseURL = corsProxy + 'inf5750-12.uio.no/api/dataElements';
 var dhisURL = corsProxy + 'inf5750-12.uio.no/api/';
@@ -36,6 +54,9 @@ TypeEnum = {
     INFO: "Info"
 }
 
+/**
+ * Filter for capitalizing words
+ */
 app.filter('capitalize', function()
 {
     return function(input)
@@ -44,6 +65,9 @@ app.filter('capitalize', function()
     };
 });
 
+/**
+ * Data filter for readable date
+ */
 app.filter('toReadableDate', function()
 {
     return function(input)
@@ -53,9 +77,13 @@ app.filter('toReadableDate', function()
     };
 });
 
+/**
+ * Main controller, creates the list of elements and handles the editing og said elements.
+ * Also controls duplication and deletion.
+ */
 app.controller("PostsCtrl", function($scope, $http)
 {
-    setBaseURL();
+    //setBaseURL();
 
     $http.defaults.headers.common.Authorization = 'Basic YWRtaW46ZGlzdHJpY3Q=';
 
@@ -111,6 +139,9 @@ app.controller("PostsCtrl", function($scope, $http)
         }
     }
 
+    /**
+     * Calls the sorting algorithm to sort list by last modified
+     */
     $scope.sortAllByModified = function()
     {
         currentParam = parseSearchString("&query=");
@@ -282,6 +313,11 @@ app.controller("PostsCtrl", function($scope, $http)
     };
 });
 
+/**
+ * Copies all fields in an element
+ * @param original the original element to copy
+ * @returns {{a new copied element}}
+ */
 function copyElement(original)
 {
     var newElement = {};
@@ -663,9 +699,7 @@ function getOptionsJSON(jsonURL)
 
 
 /**
- * TODO: Test!, fix the success/alert divs
- * TODO: We made a new modal-type error and success-message, but two modal windows cant be displayed at the same time, so we didn't change yours, but moved it.
- * NB: we removed JSON.stringify, because it fucked up all the json posting. //JSON.stringify()
+ * Sends a post request to the server containing the payload for a new data element.
  */
 function saveNewElement(newElement, successCallback, errorCallback)
 {
@@ -829,6 +863,9 @@ function search()
     }
 }
 
+/*
+Parses the search string to check for search parameters like "user:tom".
+ */
 function parseSearchString(input)
 {
     if(searchString.indexOf("user:") == 0)
@@ -909,6 +946,9 @@ function queryAPI(pageNr)
     });
 }
 
+/**
+ * Comparator for sorting by last modified
+ */
 function sortResultsByModified(array)
 {
     array.sort(function(a, b)
@@ -970,8 +1010,7 @@ function sortResults(array)
 
 /**
  * Creates a paginator-navigation-bar at the bottom, and highlights the currently selected page.
- * Renders a maximum of 5 page-links at a time (TODO: condsider changing???).
- * TODO: consider implementing input field for "direct"-jump to a page.
+ * Renders a maximum of 5 page-links at a time
  * @param pageInfo
  */
 function makePageNav(pageInfo)
@@ -1042,6 +1081,9 @@ function makePageNav(pageInfo)
     document.getElementById('pageNavigator').innerHTML = leftArrow + numberHtml + rightArrow;
 }
 
+/**
+ * Sets the Urls from the manifest.
+ */
 function setBaseURL()
 {
     $.ajax({
